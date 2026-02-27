@@ -1,0 +1,113 @@
+flowchart TB
+    subgraph HUB["🔷 Hub Subscription (Pre-existing)"]
+        direction TB
+        HUBVNET["Hub VNET\n(existing)"]
+        FW["Azure Firewall\n/ VPN Gateway"]
+        HUBDNS["Private DNS Zones\nprivatelink.*.azure.com"]
+    end
+
+    subgraph SPOKE["🟦 Spoke Subscription — AI Landing Zone"]
+        direction TB
+
+        subgraph POLICY["📋 Governance Layer"]
+            POL["Azure Policy\n• Allowed Locations\n• Required Tags\n• Deny Public AI Access"]
+            RBAC["Azure RBAC\n• Data Scientist\n• ML Engineer\n• Data Engineer\n• AI App Developer\n• Platform Admin"]
+        end
+
+        subgraph OBS["📊 Observability Layer"]
+            LAW["Log Analytics\nWorkspace"]
+            MON["Azure Monitor\nAlert Rules + Action Groups"]
+            APPI["Application\nInsights"]
+        end
+
+        subgraph NET["🌐 Spoke VNET  10.0.0.0/26"]
+            direction LR
+            S1["snet-services\n10.0.0.0/29"]
+            S2["snet-storage\n10.0.0.8/29"]
+            S3["snet-ml\n10.0.0.16/29"]
+            S4["snet-ai\n10.0.0.24/29"]
+            S5["snet-private-endpoints\n10.0.0.32/28"]
+
+            subgraph NSG["🛡️ NSGs (per subnet)"]
+                direction LR
+                NSG1["• Allow Azure Service Tags\n• Deny Internet Inbound"]
+            end
+        end
+
+        subgraph SVCAI["🤖 AI Services"]
+            AML["Azure Machine\nLearning Workspace\n+ Compute Clusters"]
+            AOAI["Azure OpenAI\nGPT-4, Embeddings"]
+            COG["Azure AI Services\nVision, Language, Speech"]
+        end
+
+        subgraph SVCPLAT["⚙️ Platform Services"]
+            KV["Key Vault\n(RBAC + Purge Protection)"]
+            ST["Storage Account\n(ADLS Gen2)"]
+            ACR["Container Registry\n(Premium)"]
+        end
+
+        subgraph PE["🔒 Private Endpoints"]
+            PE_KV["PE: Key Vault"]
+            PE_ST["PE: Storage (blob/dfs)"]
+            PE_ACR["PE: Container Registry"]
+            PE_AML["PE: AML Workspace"]
+            PE_AOAI["PE: OpenAI"]
+            PE_COG["PE: AI Services"]
+        end
+
+        TF_STATE["Terraform State\nAzure Storage Account\n(separate RG)"]
+    end
+
+    %% Hub-Spoke peering
+    HUB <-->|"VNET Peering\n(bidirectional)"| NET
+
+    %% DNS zone linking
+    HUBDNS -.->|"DNS zone linked\nto hub VNET"| PE
+
+    %% Policy scope
+    POL -->|"Assigned to\nResource Group"| SVCAI
+    POL -->|"Assigned to\nResource Group"| SVCPLAT
+
+    %% Observability connections
+    LAW -->|"Log destination"| MON
+    LAW -->|"Workspace-based mode"| APPI
+    SVCAI -->|"Diagnostic settings\n→ all logs + metrics"| LAW
+    SVCPLAT -->|"Diagnostic settings\n→ all logs + metrics"| LAW
+
+    %% Private endpoint connectivity
+    PE_KV --> KV
+    PE_ST --> ST
+    PE_ACR --> ACR
+    PE_AML --> AML
+    PE_AOAI --> AOAI
+    PE_COG --> COG
+
+    %% Services in subnets via private endpoints
+    S5 --> PE
+
+    %% AML dependencies
+    AML -->|"Secrets"| KV
+    AML -->|"Datasets + Models"| ST
+    AML -->|"Container images"| ACR
+    AML -->|"Experiment tracking"| APPI
+
+    %% RBAC
+    RBAC -->|"Role assignments"| AML
+    RBAC -->|"Role assignments"| AOAI
+    RBAC -->|"Role assignments"| KV
+
+    %% Styling
+    classDef hubStyle fill:#0078D4,stroke:#005a9e,color:#fff
+    classDef spokeStyle fill:#E8F4FD,stroke:#0078D4
+    classDef aiStyle fill:#68217A,stroke:#4a1657,color:#fff
+    classDef platStyle fill:#107C10,stroke:#0a5c0a,color:#fff
+    classDef peStyle fill:#FF8C00,stroke:#cc7000,color:#fff
+    classDef govStyle fill:#D13438,stroke:#a01e22,color:#fff
+    classDef obsStyle fill:#00B4D8,stroke:#0093B0,color:#fff
+
+    class HUBVNET,FW,HUBDNS hubStyle
+    class AML,AOAI,COG aiStyle
+    class KV,ST,ACR platStyle
+    class PE_KV,PE_ST,PE_ACR,PE_AML,PE_AOAI,PE_COG peStyle
+    class POL,RBAC govStyle
+    class LAW,MON,APPI obsStyle

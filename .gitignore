@@ -1,0 +1,33 @@
+# Terraform state and local files
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.tfplan
+tf.plan
+destroy.plan
+
+# Sensitive variable files - NEVER commit these
+terraform.tfvars
+backend.hcl
+*.auto.tfvars
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Override files (used for local dev overrides)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
