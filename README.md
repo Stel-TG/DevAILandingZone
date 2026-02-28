@@ -144,9 +144,9 @@ azure-ai-landing-zone/
 │   └── rbac/                        # Role assignments for AAD groups
 │
 ├── scripts/
-│   ├── bootstrap.sh                 # Creates Terraform state storage (run first)
-│   ├── deploy.sh                    # Full Terraform deployment script
-│   ├── destroy.sh                   # Resource cleanup script
+│   ├── bootstrap.ps1                # Creates Terraform state storage (run first)
+│   ├── deploy.ps1                   # Full Terraform deployment script
+│   ├── destroy.ps1                  # Resource cleanup script
 │   └── setup-peering.ps1            # Hub-spoke VNET peering (run after deploy)
 │
 ├── diagrams/
@@ -166,6 +166,7 @@ azure-ai-landing-zone/
 | [Terraform](https://developer.hashicorp.com/terraform/install) | >= 1.5.0 |
 | [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) | >= 2.55.0 |
 | [Azure PowerShell (Az)](https://learn.microsoft.com/en-us/powershell/azure/install-az-ps) | >= 11.0 (peering script only) |
+| [PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell) | >= 7.0 |
 
 **Required permissions:**
 - `Contributor` + `User Access Administrator` on the spoke subscription
@@ -179,25 +180,24 @@ azure-ai-landing-zone/
 
 Run once per environment. Creates the Azure Storage Account for Terraform remote state.
 
-```bash
+```powershell
 az login
-export SUBSCRIPTION_ID="<your-spoke-subscription-id>"
-export ENVIRONMENT="prod"
-export LOCATION="canadacentral"
+.\scripts\bootstrap.ps1 -SubscriptionId "<your-spoke-subscription-id>" -Environment "prod" -Location "canadacentral"
+```
 
-chmod +x scripts/*.sh
-./scripts/bootstrap.sh
+Or set environment variables first:
+
+```powershell
+$env:SUBSCRIPTION_ID = "<your-spoke-subscription-id>"
+$env:ENVIRONMENT     = "prod"
+$env:LOCATION        = "canadacentral"
+.\scripts\bootstrap.ps1
 ```
 
 ### Step 2 — Configure Variables
 
-```cmd
-:: Windows Command Prompt
+```powershell
 copy terraform.tfvars.example terraform.tfvars
-```
-```bash
-# Linux / macOS
-cp terraform.tfvars.example terraform.tfvars
 ```
 
 Key values to update in `terraform.tfvars`:
@@ -234,13 +234,23 @@ deploy_bing_grounding    = false  # Grounding with Bing
 
 ### Step 4 — Deploy Landing Zone Resources
 
-```bash
-./scripts/deploy.sh
+```powershell
+.\scripts\deploy.ps1
 ```
 
-Or manually:
+Or with options:
 
-```bash
+```powershell
+# Skip interactive confirmation (CI/CD)
+.\scripts\deploy.ps1 -AutoApprove
+
+# Generate plan only, do not apply
+.\scripts\deploy.ps1 -PlanOnly
+```
+
+Or run Terraform directly:
+
+```powershell
 terraform init -backend-config="backend.hcl"
 terraform plan -var-file="terraform.tfvars"
 terraform apply -var-file="terraform.tfvars"
@@ -263,9 +273,14 @@ Peering is a **separate step** run after the spoke VNET is provisioned. Requires
 
 ### Step 6 — Deploy a Specific Module (Optional)
 
-```bash
-./scripts/deploy.sh --target module.ai_foundry
-./scripts/deploy.sh --target module.container_app_environment
+```powershell
+.\scripts\deploy.ps1 -Target "module.ai_foundry"
+.\scripts\deploy.ps1 -Target "module.container_app_environment"
+```
+
+Or with Terraform directly:
+
+```powershell
 terraform apply -var-file="terraform.tfvars" -target=module.app_gateway
 ```
 
@@ -390,8 +405,8 @@ CI/CD pipelines:
 
 ## Destroying Resources
 
-```bash
-./scripts/destroy.sh
+```powershell
+.\scripts\destroy.ps1
 ```
 
 Then remove VNET peering:
