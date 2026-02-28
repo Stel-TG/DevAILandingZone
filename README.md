@@ -22,17 +22,19 @@ Reference: [Microsoft Azure AI Landing Zones](https://github.com/Azure/AI-Landin
 │  │  │      Foundry Agent Service (ai-foundry-agent subnet)                   │  │    │
 │  │  └────────────────────────────────────────────────────────────────────────┘  │    │
 │  │                                                                              │    │
-│  │  ┌──── AI Services VNET 10.226.214.128/25 ──────────────────────────────┐  │    │
-│  │  │  Jumpbox subnet .216/29     ── Admin VM (no public IP, Entra login)  │  │    │
-│  │  │  Private Endpoints .128/27  ── All service PE NICs                   │  │    │
-│  │  │  API Management .176/29     ── APIM internal VNet (rate limit / JWT)  │  │    │
-│  │  │  AI Foundry Agent .160/28   ── Foundry Agent Service container        │  │    │
-│  │  │  App Gateway .192/28        ── WAF v2 / OWASP 3.2 (public ingress)   │  │    │
-│  │  │  Container App Env .184/29  ── GenAI microservices (Dapr-enabled)    │  │    │
-│  │  │  Build agent .208/29        ── Self-hosted CI/CD VM                  │  │    │
-│  │  │  Databricks-public .224/28  ── Reserved                               │  │    │
-│  │  │  Databricks-private .240/28 ── Reserved                               │  │    │
-│  │  └────────────────────────────────────────────────────────────────────────┘  │    │
+│  │  ┌──── AI Services VNET 10.226.214.0/24 ───────────────────────────────┐  │    │
+│  │  │  Private Endpoints  .0/27   ── All service PE NICs (16 endpoints)   │  │    │
+│  │  │  AI Foundry Agent   .32/28  ── Foundry Agent Service container       │  │    │
+│  │  │  API Management     .48/29  ── APIM internal VNet (rate limit / JWT) │  │    │
+│  │  │  Container App Env  .64/27  ── GenAI microservices (Dapr-enabled)   │  │    │
+│  │  │  App Gateway        .96/28  ── WAF v2 / OWASP 3.2 (public ingress)  │  │    │
+│  │  │  Build agent       .112/29  ── Self-hosted CI/CD VM                 │  │    │
+│  │  │  Jumpbox           .120/29  ── Admin VM (no public IP, Entra login)  │  │    │
+│  │  │  Databricks-public .128/28  ── Reserved                              │  │    │
+│  │  │  Databricks-private .144/28 ── Reserved                              │  │    │
+│  │  │  AML Compute       .160/28  ── Compute Instances (no public IP)      │  │    │
+│  │  │  Growth space      .176–.255 ── 80 IPs unallocated for future use   │  │    │
+│  │  └───────────────────────────────────────────────────────────────────────┘  │    │
 │  │                                                                              │    │
 │  │  ┌──── GenAI app dependencies ──┐  ┌──── GenAI app microservices ────────┐  │    │
 │  │  │ Cosmos DB · Key Vault        │  │ Container App Environment           │  │    │
@@ -59,19 +61,46 @@ Reference: [Microsoft Azure AI Landing Zones](https://github.com/Azure/AI-Landin
 
 ## Subnet Reference
 
-| Subnet | CIDR | IP Range | Purpose |
-|--------|------|----------|---------|
-| `private-endpoints` | `10.226.214.128/27` | .128 – .159 (30 usable) | All service private endpoint NICs |
-| `ai-foundry-agent` | `10.226.214.160/28` | .160 – .175 (14 usable) | AI Foundry Agent Service runtime |
-| `api-management` | `10.226.214.176/29` | .176 – .183 (6 usable) | APIM internal VNet integration |
-| `container-app-environment` | `10.226.214.184/29` | .184 – .191 (6 usable) | Container App Environment |
-| `application-gateway` | `10.226.214.192/28` | .192 – .207 (14 usable) | Application Gateway + WAF (dedicated) |
-| `build-agent` | `10.226.214.208/29` | .208 – .215 (6 usable) | Self-hosted CI/CD build agent VM |
-| `jumpbox` | `10.226.214.216/29` | .216 – .223 (6 usable) | Admin jump box VM |
-| `databricks-public` | `10.226.214.224/28` | .224 – .239 (14 usable) | Reserved — future Azure Databricks |
-| `databricks-private` | `10.226.214.240/28` | .240 – .255 (14 usable) | Reserved — future Azure Databricks |
+| Subnet | CIDR | IP Range | Usable | Purpose |
+|--------|------|----------|--------|---------|
+| `private-endpoints` | `10.226.214.0/27` | .0 – .31 | 27 | All service private endpoint NICs (16 at initial deploy) |
+| `ai-foundry-agent` | `10.226.214.32/28` | .32 – .47 | 11 | AI Foundry Agent Service runtime |
+| `api-management` | `10.226.214.48/29` | .48 – .55 | 3 | APIM internal VNet integration |
+| `container-app-environment` | `10.226.214.64/27` | .64 – .95 | 27 | Container App Environment (workload profiles — /27 min required by Microsoft) |
+| `application-gateway` | `10.226.214.96/28` | .96 – .111 | 11 | Application Gateway + WAF (dedicated) |
+| `build-agent` | `10.226.214.112/29` | .112 – .119 | 3 | Self-hosted CI/CD build agent VM |
+| `jumpbox` | `10.226.214.120/29` | .120 – .127 | 3 | Admin jump box VM |
+| `databricks-public` | `10.226.214.128/28` | .128 – .143 | 11 | Reserved — future Azure Databricks |
+| `databricks-private` | `10.226.214.144/28` | .144 – .159 | 11 | Reserved — future Azure Databricks |
+| `aml-compute` | `10.226.214.160/28` | .160 – .175 | 11 | AML Compute Instances (no public IP) — chatbot dev against private endpoints |
+| *(growth space)* | `10.226.214.176/27+` | .176 – .255 | ~80 | Unallocated — available for future subnets |
 
-VNET address space: `10.226.214.128/25` (128 IPs: .128 – .255)
+VNET address space: `10.226.214.0/24` (256 IPs: .0 – .255)
+- **168 IPs allocated** across 10 subnets
+- **88 IPs unallocated** (.176 – .255) for future growth
+
+### Private Endpoint Coverage (16 NICs at initial deploy)
+
+All services have `public_network_access_enabled = false`. Access is exclusively through private endpoints in the `private-endpoints` subnet.
+
+| # | Service | DNS Zone |
+|---|---------|----------|
+| 1 | Key Vault | `privatelink.vaultcore.azure.net` |
+| 2 | Storage (blob) | `privatelink.blob.core.windows.net` |
+| 3 | Storage (DFS) | `privatelink.dfs.core.windows.net` |
+| 4 | Container Registry | `privatelink.azurecr.io` |
+| 5 | Machine Learning workspace | `privatelink.api.azureml.ms` |
+| 6 | **Azure OpenAI** | `privatelink.openai.azure.com` |
+| 7 | **Cognitive Services** | `privatelink.cognitiveservices.azure.com` |
+| 8 | AI Foundry Hub | `privatelink.api.azureml.ms` |
+| 9 | AI Search | `privatelink.search.windows.net` |
+| 10 | Cosmos DB | `privatelink.documents.azure.com` |
+| 11 | App Configuration | `privatelink.azconfig.io` |
+| 12 | Log Analytics | `privatelink.ods.opinsights.azure.com` |
+| 13 | API Management | `privatelink.azure-api.net` |
+| 14 | Container App Environment | `privatelink.azurecontainerapps.io` |
+
+> **Bold** = newly enabled for chatbot private endpoint migration (previously `deploy = false` in prod).
 
 ---
 
@@ -179,7 +208,7 @@ Key values to update in `terraform.tfvars`:
 - `apim_publisher_email`, `alert_email_addresses`
 - RBAC group object IDs (`data_scientist_group_id`, etc.)
 
-> **VNET note:** The spoke VNET uses `10.226.214.128/25`. All subnet CIDRs are pre-configured as defaults in `variables.tf`. Override the `subnets` map only if your IP plan differs.
+> **VNET note:** The spoke VNET uses `10.226.214.0/24` (256 IPs). All subnet CIDRs are pre-configured as defaults in `variables.tf`. 88 IPs (.176 – .255) remain unallocated for future growth. Override the `subnets` map only if your IP plan differs.
 
 ### Step 3 — Select Modules
 
@@ -328,19 +357,31 @@ Location short codes: `canadacentral=cc`, `canadaeast=ce`, `eastus=eu`, `eastus2
 
 ```
 Internet
-  └─> Application Gateway (WAF v2)  [application-gateway subnet .192/28]
-        └─> API Management (internal) [api-management subnet .176/29]
-              └─> Container Apps      [container-app-env subnet .184/29]
-                    ├─> Azure OpenAI   (via private endpoint .128/27)
-                    ├─> AI Search      (via private endpoint .128/27)
-                    └─> AI Foundry Agent Service  [ai-foundry-agent subnet .160/28]
+  └─> Application Gateway (WAF v2)  [application-gateway subnet .96/28]
+        └─> API Management (internal) [api-management subnet .48/29]
+              └─> Container Apps      [container-app-env subnet .64/27]
+                    ├─> Azure OpenAI   (via private endpoint .0/27)
+                    ├─> AI Search      (via private endpoint .0/27)
+                    └─> AI Foundry Agent Service  [ai-foundry-agent subnet .32/28]
+
+Chatbot development (private endpoint migration validation):
+  Hub Bastion / VPN ──> Jumpbox VM  [jumpbox subnet .120/29]
+                          └─> AML Compute Instance  [aml-compute subnet .160/28]
+                                ├─> Azure OpenAI      (via private endpoint .0/27)
+                                ├─> AI Search         (via private endpoint .0/27)
+                                ├─> Cosmos DB         (via private endpoint .0/27)
+                                ├─> Storage           (via private endpoint .0/27)
+                                └─> Key Vault         (via private endpoint .0/27)
+
+AML compute clusters (batch training):
+  AML managed VNet ──> OpenAI, AI Search, Cosmos DB
+                        (via AML-managed outbound PE rules — separate from spoke PEs)
 
 Admin access:
-  Hub Bastion ──> Jump box VM  [jumpbox subnet .216/29]
-  Hub VPN     ──> Jump box VM  (for dev environments)
+  Hub Bastion ──> Jump box VM  [jumpbox subnet .120/29]
 
 CI/CD pipelines:
-  Build agent VM  [build-agent subnet .208/29]
+  Build agent VM  [build-agent subnet .112/29]
     └─> Container Registry  (via private endpoint)
     └─> Container App Environment  (deploy revisions)
 ```

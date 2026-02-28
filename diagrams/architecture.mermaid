@@ -1,113 +1,160 @@
 flowchart TB
+    subgraph INTERNET["🌐 Internet"]
+        USER["End Users / Clients"]
+    end
+
     subgraph HUB["🔷 Hub Subscription (Pre-existing)"]
         direction TB
-        HUBVNET["Hub VNET\n(existing)"]
-        FW["Azure Firewall\n/ VPN Gateway"]
+        BASTION["Azure Bastion"]
+        FW["Azure Firewall / VPN Gateway"]
         HUBDNS["Private DNS Zones\nprivatelink.*.azure.com"]
+        HUBVNET["Hub VNET (existing)"]
     end
 
-    subgraph SPOKE["🟦 Spoke Subscription — AI Landing Zone"]
+    subgraph SPOKE["🟦 Spoke Subscription — AI Landing Zone Dev  (10.226.214.0/24)"]
         direction TB
 
-        subgraph POLICY["📋 Governance Layer"]
-            POL["Azure Policy\n• Allowed Locations\n• Required Tags\n• Deny Public AI Access"]
-            RBAC["Azure RBAC\n• Data Scientist\n• ML Engineer\n• Data Engineer\n• AI App Developer\n• Platform Admin"]
+        subgraph GOV["📋 Governance"]
+            POL["Azure Policy\n• Allowed Locations\n• Deny Public AI Access\n• Required Tags"]
+            RBAC["Azure RBAC\n• Data Scientist\n• ML Engineer\n• AI App Developer\n• Platform Admin"]
         end
 
-        subgraph OBS["📊 Observability Layer"]
+        subgraph OBS["📊 Observability"]
             LAW["Log Analytics\nWorkspace"]
-            MON["Azure Monitor\nAlert Rules + Action Groups"]
             APPI["Application\nInsights"]
+            MON["Azure Monitor\nAlerts"]
         end
 
-        subgraph NET["🌐 Spoke VNET  10.0.0.0/26"]
-            direction LR
-            S1["snet-services\n10.0.0.0/29"]
-            S2["snet-storage\n10.0.0.8/29"]
-            S3["snet-ml\n10.0.0.16/29"]
-            S4["snet-ai\n10.0.0.24/29"]
-            S5["snet-private-endpoints\n10.0.0.32/28"]
+        subgraph NET["🌐 Spoke VNET  10.226.214.0/24"]
+            direction TB
 
-            subgraph NSG["🛡️ NSGs (per subnet)"]
-                direction LR
-                NSG1["• Allow Azure Service Tags\n• Deny Internet Inbound"]
+            subgraph INGRESS_SUBNETS["Ingress"]
+                AGW_SN["application-gateway\n.96/28  (11 usable)\nWAF_v2 autoscale 2-10"]
+                APIM_SN["api-management\n.48/29  (3 usable)\nAPIM internal VNet"]
             end
+
+            subgraph APP_SUBNETS["Application"]
+                CAE_SN["container-app-environment\n.64/27  (27 usable)\nGenAI microservices"]
+                FAA_SN["ai-foundry-agent\n.32/28  (11 usable)\nFoundry Agent Service"]
+            end
+
+            subgraph AML_SUBNETS["AML Chatbot Dev"]
+                AML_SN["aml-compute\n.160/28  (11 usable)\nCompute Instances (no public IP)\nValidates PE connectivity"]
+            end
+
+            subgraph ADMIN_SUBNETS["Admin / CI-CD"]
+                JB_SN["jumpbox\n.120/29  (3 usable)"]
+                BA_SN["build-agent\n.112/29  (3 usable)"]
+            end
+
+            subgraph RESERVED_SUBNETS["Reserved"]
+                DB1_SN["databricks-public\n.128/28  (11 usable)"]
+                DB2_SN["databricks-private\n.144/28  (11 usable)"]
+            end
+
+            PE_SN["private-endpoints\n.0/27  (27 usable)\n16 PE NICs at initial deploy"]
         end
 
-        subgraph SVCAI["🤖 AI Services"]
-            AML["Azure Machine\nLearning Workspace\n+ Compute Clusters"]
-            AOAI["Azure OpenAI\nGPT-4, Embeddings"]
-            COG["Azure AI Services\nVision, Language, Speech"]
+        subgraph AIML["AI / ML Services  (all public access disabled)"]
+            AML["Azure Machine Learning\nWorkspace\nAllowOnlyApprovedOutbound\nCompute Clusters + Instances"]
+            AOAI["Azure OpenAI\nGPT-4 + Embeddings\npublic access disabled"]
+            COG["Azure AI Services\nVision, Language, Speech\npublic access disabled"]
+            SRCH["Azure AI Search\nVector RAG Index"]
+            AIF["AI Foundry Hub\nProject + Agent Service"]
         end
 
-        subgraph SVCPLAT["⚙️ Platform Services"]
-            KV["Key Vault\n(RBAC + Purge Protection)"]
-            ST["Storage Account\n(ADLS Gen2)"]
-            ACR["Container Registry\n(Premium)"]
+        subgraph DATA["Data Services"]
+            COSMOS["Cosmos DB\nAgent memory + app state"]
+            ST["Storage Account\nADLS Gen2"]
+            KV["Key Vault\nRBAC + Purge Protection"]
+            ACR["Container Registry\nPremium SKU"]
+            APPCS["App Configuration"]
         end
 
-        subgraph PE["🔒 Private Endpoints"]
-            PE_KV["PE: Key Vault"]
-            PE_ST["PE: Storage (blob/dfs)"]
-            PE_ACR["PE: Container Registry"]
-            PE_AML["PE: AML Workspace"]
-            PE_AOAI["PE: OpenAI"]
-            PE_COG["PE: AI Services"]
+        subgraph APPS["GenAI Microservices (Dapr-enabled)"]
+            FE["Frontend"]
+            ORCH["Orchestrator"]
+            SK["Semantic Kernel"]
+            MCP["MCP Server"]
+            ING["Ingestion"]
         end
 
-        TF_STATE["Terraform State\nAzure Storage Account\n(separate RG)"]
+        subgraph PE_GROUP["Private Endpoints  (.0/27 subnet)"]
+            direction LR
+            PE1["KV, Storage, ACR"]
+            PE2["AML, OpenAI, CogSvc, AI Foundry"]
+            PE3["AI Search, Cosmos, AppConfig"]
+            PE4["Log Analytics, APIM, CAE"]
+        end
+
+        subgraph AML_MANAGED["AML Managed VNet (internal to AML)"]
+            AML_PE["Managed outbound PE rules\nOpenAI, AI Search, Cosmos DB\ndoes not consume spoke subnet IPs"]
+        end
     end
 
-    %% Hub-Spoke peering
-    HUB <-->|"VNET Peering\n(bidirectional)"| NET
+    USER -->|"HTTPS only public ingress"| AGW_SN
+    AGW_SN --> APIM_SN
+    APIM_SN -->|"Rate limit + JWT auth"| CAE_SN
 
-    %% DNS zone linking
-    HUBDNS -.->|"DNS zone linked\nto hub VNET"| PE
+    HUB <-->|"VNET Peering"| NET
+    HUBDNS -.->|"DNS zones linked to hub"| PE_GROUP
 
-    %% Policy scope
-    POL -->|"Assigned to\nResource Group"| SVCAI
-    POL -->|"Assigned to\nResource Group"| SVCPLAT
+    BASTION -->|"Secure admin"| JB_SN
+    JB_SN -->|"SSH dev access"| AML_SN
 
-    %% Observability connections
-    LAW -->|"Log destination"| MON
-    LAW -->|"Workspace-based mode"| APPI
-    SVCAI -->|"Diagnostic settings\n→ all logs + metrics"| LAW
-    SVCPLAT -->|"Diagnostic settings\n→ all logs + metrics"| LAW
+    AML_SN -->|"All traffic via private endpoints"| PE_SN
+    PE_SN --> PE1
+    PE_SN --> PE2
+    PE_SN --> PE3
+    PE_SN --> PE4
 
-    %% Private endpoint connectivity
-    PE_KV --> KV
-    PE_ST --> ST
-    PE_ACR --> ACR
-    PE_AML --> AML
-    PE_AOAI --> AOAI
-    PE_COG --> COG
+    AML -->|"Managed outbound PE rules"| AML_MANAGED
+    AML_MANAGED -->|"OpenAI, Search, Cosmos"| PE_GROUP
 
-    %% Services in subnets via private endpoints
-    S5 --> PE
+    PE1 --> KV
+    PE1 --> ST
+    PE1 --> ACR
+    PE2 --> AML
+    PE2 --> AOAI
+    PE2 --> COG
+    PE2 --> AIF
+    PE3 --> SRCH
+    PE3 --> COSMOS
+    PE3 --> APPCS
+    PE4 --> LAW
+    PE4 --> APIM_SN
 
-    %% AML dependencies
-    AML -->|"Secrets"| KV
-    AML -->|"Datasets + Models"| ST
-    AML -->|"Container images"| ACR
-    AML -->|"Experiment tracking"| APPI
+    CAE_SN --> FE & ORCH & SK & MCP & ING
+    ORCH --> AOAI & SRCH & COSMOS
+    FAA_SN --> AIF
 
-    %% RBAC
-    RBAC -->|"Role assignments"| AML
-    RBAC -->|"Role assignments"| AOAI
-    RBAC -->|"Role assignments"| KV
+    BA_SN -->|"Push images"| ACR
+    BA_SN -->|"Deploy revisions"| CAE_SN
 
-    %% Styling
+    AIML --> LAW
+    DATA --> LAW
+    APPS --> APPI
+
     classDef hubStyle fill:#0078D4,stroke:#005a9e,color:#fff
-    classDef spokeStyle fill:#E8F4FD,stroke:#0078D4
+    classDef internetStyle fill:#555,stroke:#333,color:#fff
+    classDef subnetStyle fill:#E8F4FD,stroke:#0078D4,color:#000
+    classDef amlSubnetStyle fill:#FFF4CE,stroke:#F0A500,color:#000
+    classDef peSubnetStyle fill:#FF8C00,stroke:#cc7000,color:#fff
     classDef aiStyle fill:#68217A,stroke:#4a1657,color:#fff
-    classDef platStyle fill:#107C10,stroke:#0a5c0a,color:#fff
-    classDef peStyle fill:#FF8C00,stroke:#cc7000,color:#fff
-    classDef govStyle fill:#D13438,stroke:#a01e22,color:#fff
+    classDef dataStyle fill:#107C10,stroke:#0a5c0a,color:#fff
     classDef obsStyle fill:#00B4D8,stroke:#0093B0,color:#fff
+    classDef govStyle fill:#D13438,stroke:#a01e22,color:#fff
+    classDef peStyle fill:#FF8C00,stroke:#cc7000,color:#fff
+    classDef managedStyle fill:#B4D6FF,stroke:#0078D4,color:#000
 
-    class HUBVNET,FW,HUBDNS hubStyle
-    class AML,AOAI,COG aiStyle
-    class KV,ST,ACR platStyle
-    class PE_KV,PE_ST,PE_ACR,PE_AML,PE_AOAI,PE_COG peStyle
+    class BASTION,FW,HUBDNS,HUBVNET hubStyle
+    class USER internetStyle
+    class AGW_SN,APIM_SN,CAE_SN,FAA_SN,JB_SN,BA_SN,DB1_SN,DB2_SN subnetStyle
+    class AML_SN amlSubnetStyle
+    class PE_SN peSubnetStyle
+    class AML,AOAI,COG,SRCH,AIF aiStyle
+    class COSMOS,ST,KV,ACR,APPCS dataStyle
+    class LAW,APPI,MON obsStyle
     class POL,RBAC govStyle
-    class LAW,MON,APPI obsStyle
+    class PE1,PE2,PE3,PE4 peStyle
+    class AML_MANAGED,AML_PE managedStyle

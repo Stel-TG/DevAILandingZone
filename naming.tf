@@ -101,6 +101,9 @@ locals {
     pe_apim                   = "pe-apim-${var.project_name}-${var.environment}-${var.location_short}"
     pe_container_app_env      = "pe-cae-${var.project_name}-${var.environment}-${var.location_short}"
 
+    # ── AML Compute (no-public-IP interactive dev) ────────────────────────────
+    aml_compute_instance      = "ci-dev-${var.project_name}-${var.environment}-${var.location_short}"
+
     # ── Policy assignments ────────────────────────────────────────────────────
     policy_allowed_locations  = "pa-allowed-locations-${var.environment}"
     policy_required_tags      = "pa-required-tags-${var.environment}"

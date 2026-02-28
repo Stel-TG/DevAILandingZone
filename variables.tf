@@ -107,8 +107,8 @@ variable "deploy_key_vault"            { type = bool; default = true;  descripti
 variable "deploy_storage"              { type = bool; default = true;  description = "Deploy Azure Storage Account for ML artifacts." }
 variable "deploy_container_registry"   { type = bool; default = true;  description = "Deploy Azure Container Registry for ML container images." }
 variable "deploy_machine_learning"     { type = bool; default = true;  description = "Deploy Azure Machine Learning workspace." }
-variable "deploy_cognitive_services"   { type = bool; default = false; description = "Deploy Azure AI Services (Cognitive Services) multi-service account." }
-variable "deploy_openai"               { type = bool; default = false; description = "Deploy Azure OpenAI Service with model deployments." }
+variable "deploy_cognitive_services"   { type = bool; default = true;  description = "Deploy Azure AI Services (Cognitive Services) multi-service account. Required for chatbot NLP features; public access disabled, PE required." }
+variable "deploy_openai"               { type = bool; default = true;  description = "Deploy Azure OpenAI Service with model deployments. Required for chatbot LLM inference; public access disabled, PE required." }
 variable "deploy_private_endpoints"    { type = bool; default = true;  description = "Deploy private endpoints for all services." }
 variable "deploy_rbac"                 { type = bool; default = true;  description = "Deploy RBAC role assignments for team groups." }
 
@@ -130,13 +130,13 @@ variable "deploy_network_watcher"      { type = bool; default = true;  descripti
 # NETWORKING VARIABLES
 # -----------------------------------------------------------------------------
 variable "vnet_address_space" {
-  description = "CIDR address space for the spoke VNET. Extended to /25 (128 IPs) to accommodate all AI Landing Zone subnets."
+  description = "CIDR address space for the spoke VNET. Expanded to /24 (256 IPs) to accommodate all AI Landing Zone subnets with room for growth. 80 IPs remain unallocated (.176 – .255) for future subnets."
   type        = list(string)
-  default     = ["10.226.214.128/25"]
+  default     = ["10.226.214.0/24"]
 }
 
 variable "subnets" {
-  description = "Map of subnet definitions. Eight /27 or /28 subnets carved from the /25 address space."
+  description = "Map of subnet definitions. Nine subnets carved from the /24 address space (10.226.214.0/24). 104 IPs remain unallocated (.160 – .255) for future growth."
   type = map(object({
     address_prefix    = string
     service_endpoints = list(string)
@@ -144,65 +144,79 @@ variable "subnets" {
   default = {
     # ── Core private endpoints ─────────────────────────────────────────────────
     "private-endpoints" = {
-      # 10.226.214.128 – 10.226.214.159  (30 usable) — all service private endpoints
-      address_prefix    = "10.226.214.128/27"
+      # 10.226.214.0 – 10.226.214.31  (27 usable) — all service private endpoints
+      address_prefix    = "10.226.214.0/27"
       service_endpoints = []
     }
 
     # ── AI Foundry Agent ───────────────────────────────────────────────────────
     "ai-foundry-agent" = {
-      # 10.226.214.160 – 10.226.214.175  (14 usable) — AI Foundry Agent Service
-      address_prefix    = "10.226.214.160/28"
+      # 10.226.214.32 – 10.226.214.47  (11 usable) — AI Foundry Agent Service
+      address_prefix    = "10.226.214.32/28"
       service_endpoints = ["Microsoft.Storage", "Microsoft.KeyVault", "Microsoft.CognitiveServices"]
     }
 
     # ── API Management ─────────────────────────────────────────────────────────
     "api-management" = {
-      # 10.226.214.176 – 10.226.214.183  (6 usable) — APIM internal VNet mode
-      address_prefix    = "10.226.214.176/29"
+      # 10.226.214.48 – 10.226.214.55  (3 usable) — APIM internal VNet mode
+      address_prefix    = "10.226.214.48/29"
       service_endpoints = ["Microsoft.Storage", "Microsoft.Sql", "Microsoft.EventHub"]
     }
 
     # ── Container App Environment ──────────────────────────────────────────────
     "container-app-environment" = {
-      # 10.226.214.184 – 10.226.214.191  (6 usable) — Container Apps Environment
-      # Note: for production scale, increase to /27 and adjust address plan
-      address_prefix    = "10.226.214.184/29"
+      # 10.226.214.64 – 10.226.214.95  (27 usable) — Container Apps Environment
+      # /27 is the Microsoft-mandated minimum for VNet-injected workload-profiles CAE.
+      address_prefix    = "10.226.214.64/27"
       service_endpoints = ["Microsoft.Storage", "Microsoft.ContainerRegistry"]
     }
 
     # ── Application Gateway / WAF ──────────────────────────────────────────────
     "application-gateway" = {
-      # 10.226.214.192 – 10.226.214.207  (14 usable) — AppGW requires dedicated subnet
-      address_prefix    = "10.226.214.192/28"
+      # 10.226.214.96 – 10.226.214.111  (11 usable) — AppGW requires dedicated subnet
+      address_prefix    = "10.226.214.96/28"
       service_endpoints = []
     }
 
     # ── Build agent ────────────────────────────────────────────────────────────
     "build-agent" = {
-      # 10.226.214.208 – 10.226.214.215  (6 usable) — self-hosted build agent VM
-      address_prefix    = "10.226.214.208/29"
+      # 10.226.214.112 – 10.226.214.119  (3 usable) — self-hosted build agent VM
+      address_prefix    = "10.226.214.112/29"
       service_endpoints = ["Microsoft.Storage", "Microsoft.ContainerRegistry"]
     }
 
     # ── Jump box ───────────────────────────────────────────────────────────────
     "jumpbox" = {
-      # 10.226.214.216 – 10.226.214.223  (6 usable) — admin jump box VM
-      address_prefix    = "10.226.214.216/29"
+      # 10.226.214.120 – 10.226.214.127  (3 usable) — admin jump box VM
+      address_prefix    = "10.226.214.120/29"
       service_endpoints = []
     }
 
     # ── Databricks (reserved) ──────────────────────────────────────────────────
     "databricks-public" = {
-      # 10.226.214.224 – 10.226.214.239  (14 usable) — reserved, future use
-      address_prefix    = "10.226.214.224/28"
+      # 10.226.214.128 – 10.226.214.143  (11 usable) — reserved, future Azure Databricks
+      address_prefix    = "10.226.214.128/28"
       service_endpoints = ["Microsoft.Storage"]
     }
     "databricks-private" = {
-      # 10.226.214.240 – 10.226.214.255  (14 usable) — reserved, future use
-      address_prefix    = "10.226.214.240/28"
+      # 10.226.214.144 – 10.226.214.159  (11 usable) — reserved, future Azure Databricks
+      address_prefix    = "10.226.214.144/28"
       service_endpoints = ["Microsoft.Storage"]
     }
+
+    # ── AML Compute Instances (no-public-IP) ───────────────────────────────────
+    "aml-compute" = {
+      # 10.226.214.160 – 10.226.214.175  (11 usable) — AML Compute Instances
+      # Dedicated subnet required by Microsoft for no-public-IP compute instances.
+      # Compute Instance NICs inject here so developers reach services via spoke PEs.
+      # No service endpoints — all traffic routes through private endpoints.
+      address_prefix    = "10.226.214.160/28"
+      service_endpoints = []
+    }
+
+    # ── Growth space ───────────────────────────────────────────────────────────
+    # 10.226.214.176 – 10.226.214.255  (80 IPs, ~72 usable across subnets)
+    # Reserved for future expansion — add subnets here as needed.
   }
 }
 

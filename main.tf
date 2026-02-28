@@ -520,8 +520,16 @@ module "cosmos_db" {
 
 ###############################################################################
 # AZURE MACHINE LEARNING
-# Optional classic AML workspace for data science workloads alongside
-# AI Foundry. Kept separate from the Foundry hub.
+# Primary workload — chatbot refactoring and private endpoint migration validation.
+# Chatbots currently use public network access in prod; this dev environment
+# proves all service connectivity works exclusively through private endpoints
+# before prod cutover.
+#
+# What this deploys:
+#   - AML workspace (public access disabled, PE in private-endpoints subnet)
+#   - CPU compute cluster (AML managed VNet, AllowOnlyApprovedOutbound)
+#   - Compute Instance with no_public_ip=true (NIC in aml-compute subnet)
+#   - Managed outbound PE rules for OpenAI, AI Search, Cosmos DB
 ###############################################################################
 module "machine_learning" {
   source = "./modules/machine_learning"
@@ -538,11 +546,23 @@ module "machine_learning" {
   container_registry_id      = var.deploy_container_registry ? module.container_registry[0].id : null
   log_analytics_workspace_id = local.law_id
   allowed_subnet_ids         = var.deploy_networking ? [module.networking[0].subnet_ids["private-endpoints"]] : []
-  tags                       = local.common_tags
+
+  # Compute Instance — injected into aml-compute subnet (no public IP)
+  deploy_compute_instance  = var.deploy_networking ? true : false
+  aml_compute_subnet_id    = var.deploy_networking ? module.networking[0].subnet_ids["aml-compute"] : null
+  admin_ssh_public_key     = var.admin_ssh_public_key
+
+  # Managed outbound PE rules — lets compute clusters reach services privately
+  openai_resource_id     = var.deploy_openai    ? module.openai[0].id    : null
+  ai_search_resource_id  = var.deploy_ai_search ? module.ai_search[0].id : null
+  cosmos_db_resource_id  = var.deploy_cosmos_db ? module.cosmos_db[0].id : null
+
+  tags = local.common_tags
 
   depends_on = [
     module.key_vault, module.storage, module.application_insights,
-    module.container_registry, module.networking, module.log_analytics
+    module.container_registry, module.networking, module.log_analytics,
+    module.openai, module.ai_search, module.cosmos_db
   ]
 }
 

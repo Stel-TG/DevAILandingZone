@@ -16,3 +16,43 @@ variable "cpu_cluster_priority"       { type = string; default = "LowPriority" }
 variable "gpu_cluster_vm_size"        { type = string; default = "Standard_NC6s_v3" }
 variable "gpu_cluster_max_nodes"      { type = number; default = 2 }
 variable "tags"                       { type = map(string); default = {} }
+
+# Compute Instance — no-public-IP interactive dev node in aml-compute subnet
+variable "deploy_compute_instance" {
+  type        = bool
+  default     = true
+  description = "Deploy an AML Compute Instance with no public IP into the aml-compute subnet. Enables interactive chatbot development against private endpoints."
+}
+variable "compute_instance_vm_size" {
+  type        = string
+  default     = "Standard_DS3_v2"
+  description = "VM size for the AML Compute Instance used for interactive dev."
+}
+variable "aml_compute_subnet_id" {
+  type        = string
+  default     = null
+  description = "Subnet ID for the AML Compute Instance NIC (aml-compute subnet). Required when deploy_compute_instance = true."
+}
+variable "admin_ssh_public_key" {
+  type        = string
+  default     = ""
+  description = "SSH public key for Compute Instance access via jumpbox / Bastion."
+}
+
+# Managed network outbound rule targets — pass resource IDs of spoke services
+# so AML creates its own managed PEs for compute cluster egress.
+variable "openai_resource_id" {
+  type        = string
+  default     = null
+  description = "Azure OpenAI resource ID. Creates AML managed outbound PE rule so compute clusters reach OpenAI privately."
+}
+variable "ai_search_resource_id" {
+  type        = string
+  default     = null
+  description = "Azure AI Search resource ID. Creates AML managed outbound PE rule for RAG retrieval."
+}
+variable "cosmos_db_resource_id" {
+  type        = string
+  default     = null
+  description = "Cosmos DB account resource ID. Creates AML managed outbound PE rule for chatbot conversation memory."
+}
