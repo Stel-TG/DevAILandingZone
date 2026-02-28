@@ -84,6 +84,21 @@ variable "tenant_id" {
 # Useful for phased rollouts or environments that don't require all services.
 # -----------------------------------------------------------------------------
 variable "deploy_policy"               { type = bool; default = true;  description = "Deploy Azure Policy definitions and assignments." }
+
+variable "deny_public_access_effect" {
+  description = <<-DESC
+    Effect for all Deny Public Network Access policy assignments.
+    "Deny"     — Block resource creation/update if publicNetworkAccess != Disabled (use in prod).
+    "Audit"    — Log a compliance violation but allow the operation (use during onboarding).
+    "Disabled" — Policy is inactive (break-glass only).
+  DESC
+  type    = string
+  default = "Deny"
+  validation {
+    condition     = contains(["Deny", "Audit", "Disabled"], var.deny_public_access_effect)
+    error_message = "deny_public_access_effect must be Deny, Audit, or Disabled."
+  }
+}
 variable "deploy_log_analytics"        { type = bool; default = true;  description = "Deploy Log Analytics Workspace for centralized logging." }
 variable "deploy_monitor"              { type = bool; default = true;  description = "Deploy Azure Monitor action groups and alert rules." }
 variable "deploy_application_insights" { type = bool; default = true;  description = "Deploy Application Insights for application telemetry." }

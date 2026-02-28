@@ -33,6 +33,10 @@ tenant_id             = "22222222-2222-2222-2222-222222222222"
 
 # Foundation
 deploy_policy               = true
+
+# Effect for all "Deny Public Network Access" policy assignments.
+# Switch to "Audit" when onboarding existing resources before enforcing Deny.
+deny_public_access_effect = "Deny"
 deploy_log_analytics        = true
 deploy_monitor              = true
 deploy_application_insights = true

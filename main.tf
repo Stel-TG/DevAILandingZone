@@ -215,12 +215,13 @@ module "policy" {
 
   count = var.deploy_policy ? 1 : 0
 
-  resource_group_name = module.resource_group.name
-  location            = var.location
-  environment         = var.environment
-  allowed_locations   = var.allowed_locations
-  project_name        = var.project_name
-  tags                = local.common_tags
+  resource_group_id         = module.resource_group.id
+  resource_group_name       = module.resource_group.name
+  location                  = var.location
+  environment               = var.environment
+  allowed_locations         = var.allowed_locations
+  deny_public_access_effect = var.deny_public_access_effect
+  tags                      = local.common_tags
 
   depends_on = [module.resource_group]
 }
