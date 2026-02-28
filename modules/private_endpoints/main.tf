@@ -4,15 +4,20 @@
 # DNS zones are linked to the hub VNET so on-premises and hub clients can
 # resolve private endpoint FQDNs without additional DNS infrastructure.
 #
-# Each resource type uses a specific DNS zone:
-#   Key Vault:            privatelink.vaultcore.azure.net
-#   Storage (blob):       privatelink.blob.core.windows.net
-#   Storage (dfs):        privatelink.dfs.core.windows.net
-#   Container Registry:   privatelink.azurecr.io
-#   AML Workspace:        privatelink.api.azureml.ms
-#   Cognitive Services:   privatelink.cognitiveservices.azure.com
-#   OpenAI:               privatelink.openai.azure.com
-#   Log Analytics:        privatelink.ods.opinsights.azure.com
+# DNS zone mapping (per service):
+#   Key Vault:              privatelink.vaultcore.azure.net
+#   Storage (blob):         privatelink.blob.core.windows.net
+#   Storage (dfs):          privatelink.dfs.core.windows.net
+#   Container Registry:     privatelink.azurecr.io
+#   AML / AI Foundry Hub:   privatelink.api.azureml.ms
+#   Cognitive Services:     privatelink.cognitiveservices.azure.com
+#   OpenAI:                 privatelink.openai.azure.com
+#   Log Analytics:          privatelink.ods.opinsights.azure.com
+#   AI Search:              privatelink.search.windows.net
+#   Cosmos DB:              privatelink.documents.azure.com
+#   App Configuration:      privatelink.azconfig.io
+#   APIM:                   privatelink.azure-api.net
+#   Container App Env:      privatelink.azurecontainerapps.io
 ###############################################################################
 
 # Local map: service name -> {resource_id, subresource, dns_zone}
@@ -20,6 +25,7 @@
 locals {
   pe_definitions = {
     for k, v in {
+      # ── Core shared services ────────────────────────────────────────────────
       key_vault = {
         id          = var.key_vault_id
         subresource = "vault"
@@ -40,6 +46,8 @@ locals {
         subresource = "registry"
         dns_zone    = "privatelink.azurecr.io"
       }
+
+      # ── AI / ML services ────────────────────────────────────────────────────
       machine_learning = {
         id          = var.machine_learning_id
         subresource = "amlworkspace"
@@ -54,6 +62,46 @@ locals {
         id          = var.openai_id
         subresource = "account"
         dns_zone    = "privatelink.openai.azure.com"
+      }
+
+      # ── AI Foundry Hub ──────────────────────────────────────────────────────
+      # The AI Foundry hub and project are backed by AML workspace resources.
+      # They share the privatelink.api.azureml.ms zone.
+      ai_foundry = {
+        id          = var.ai_foundry_id
+        subresource = "amlworkspace"
+        dns_zone    = "privatelink.api.azureml.ms"
+      }
+
+      # ── AI Foundry dependencies ─────────────────────────────────────────────
+      ai_search = {
+        id          = var.ai_search_id
+        subresource = "searchService"
+        dns_zone    = "privatelink.search.windows.net"
+      }
+      cosmos_db = {
+        id          = var.cosmos_db_id
+        subresource = "Sql"
+        dns_zone    = "privatelink.documents.azure.com"
+      }
+
+      # ── GenAI app dependencies ───────────────────────────────────────────────
+      app_configuration = {
+        id          = var.app_configuration_id
+        subresource = "configurationStores"
+        dns_zone    = "privatelink.azconfig.io"
+      }
+
+      # ── Ingress and observability ────────────────────────────────────────────
+      log_analytics = {
+        id          = var.log_analytics_id
+        subresource = "workspace"
+        dns_zone    = "privatelink.ods.opinsights.azure.com"
+      }
+      api_management = {
+        id          = var.api_management_id
+        subresource = "Gateway"
+        dns_zone    = "privatelink.azure-api.net"
       }
     } : k => v if v.id != null
   }

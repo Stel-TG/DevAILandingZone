@@ -1,311 +1,601 @@
-<svg width="1100" height="820" viewBox="0 0 1100 820" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif">
+<svg width="1400" height="1060" viewBox="0 0 1400 1060" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, sans-serif" font-size="10">
 
-  <!-- Background -->
-  <rect width="1100" height="820" fill="#f0f4f8" rx="8"/>
+  <!-- ═══════ BACKGROUND ═══════ -->
+  <rect width="1400" height="1060" fill="#f5f7fa" rx="6"/>
 
-  <!-- Title -->
-  <text x="550" y="38" text-anchor="middle" font-size="20" font-weight="bold" fill="#0078d4">Azure AI Landing Zone — Architecture</text>
-  <text x="550" y="58" text-anchor="middle" font-size="12" fill="#555">Hub-Spoke | Private Endpoints | Terraform Managed | Peering via setup-peering.ps1</text>
+  <!-- ═══════ TITLE ═══════ -->
+  <text x="700" y="28" text-anchor="middle" font-size="17" font-weight="bold" fill="#0078d4">Azure AI Landing Zone — AI Foundry Agent Service Standard Setup</text>
+  <text x="700" y="46" text-anchor="middle" font-size="11" fill="#555">AI Landing Zone prod subscription  |  Hub-Spoke  |  10.226.214.128/25  |  Terraform Managed  |  Peering: scripts\setup-peering.ps1</text>
 
-  <!-- ═══════════════════════════════════════════════════ -->
-  <!-- SPOKE SUBSCRIPTION BOX -->
-  <!-- ═══════════════════════════════════════════════════ -->
-  <rect x="20" y="70" width="820" height="720" rx="10" fill="none" stroke="#0078d4" stroke-width="2" stroke-dasharray="8,4"/>
-  <rect x="20" y="70" width="200" height="24" rx="4" fill="#0078d4"/>
-  <text x="30" y="86" font-size="12" fill="white" font-weight="bold">AI Landing Zone Subscription (Spoke)</text>
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       LEFT SIDEBAR — Subscription-level controls
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <rect x="10" y="58" width="108" height="240" rx="6" fill="white" stroke="#ccc" stroke-width="1"/>
+  <text x="64" y="74" text-anchor="middle" font-size="10" font-weight="bold" fill="#555">Subscription</text>
 
-  <!-- ─── Resource Group ─── -->
-  <rect x="35" y="102" width="790" height="680" rx="8" fill="none" stroke="#00b294" stroke-width="1.5" stroke-dasharray="5,3"/>
-  <rect x="35" y="102" width="220" height="20" rx="3" fill="#00b294"/>
-  <text x="44" y="116" font-size="11" fill="white">rg-ailz-prod-cc  (Resource Group)</text>
+  <!-- Role assignments -->
+  <rect x="24" y="82" width="80" height="56" rx="4" fill="#e8f4fd" stroke="#0078d4" stroke-width="1"/>
+  <rect x="40" y="88" width="24" height="24" rx="3" fill="#0078d4"/>
+  <text x="52" y="104" text-anchor="middle" font-size="8" fill="white" font-weight="bold">R</text>
+  <text x="64" y="122" text-anchor="middle" font-size="9" fill="#333">Role</text>
+  <text x="64" y="132" text-anchor="middle" font-size="9" fill="#333">assignments</text>
 
-  <!-- ─── VNET Box ─── -->
-  <rect x="48" y="130" width="560" height="540" rx="8" fill="#e8f4fd" stroke="#0078d4" stroke-width="1.5"/>
-  <rect x="48" y="130" width="265" height="20" rx="3" fill="#0078d4"/>
-  <text x="56" y="144" font-size="11" fill="white" font-weight="bold">VNET  10.226.214.192/26  (64 IPs: .192 to .255)</text>
+  <!-- Workload policy assignments -->
+  <rect x="24" y="148" width="80" height="56" rx="4" fill="#e8f4fd" stroke="#0078d4" stroke-width="1"/>
+  <rect x="40" y="154" width="24" height="24" rx="3" fill="#7a43b6"/>
+  <text x="52" y="170" text-anchor="middle" font-size="8" fill="white" font-weight="bold">W</text>
+  <text x="64" y="188" text-anchor="middle" font-size="9" fill="#333">Workload policy</text>
+  <text x="64" y="198" text-anchor="middle" font-size="9" fill="#333">assignments</text>
 
-  <!-- Subnet: Machine Learning -->
-  <rect x="60" y="158" width="255" height="128" rx="6" fill="#dff6dd" stroke="#107c10" stroke-width="1.5"/>
-  <rect x="60" y="158" width="255" height="18" rx="3" fill="#107c10"/>
-  <text x="68" y="170" font-size="10" fill="white" font-weight="bold">machine-learning  10.226.214.192/28</text>
-  <text x="68" y="188" font-size="9" fill="#555">Range: .192 to .207  (14 usable IPs)</text>
-  <text x="70" y="204" font-size="10" fill="#333">AML Compute Clusters</text>
-  <text x="70" y="219" font-size="10" fill="#333">Training Job Containers</text>
-  <text x="70" y="234" font-size="10" fill="#333">Inference Endpoints</text>
-  <text x="70" y="249" font-size="9" fill="#888">NSG: Deny Internet inbound/outbound</text>
-  <text x="70" y="263" font-size="9" fill="#888">Allow: AML, Batch, Storage, KV tags</text>
-  <text x="70" y="277" font-size="9" fill="#888">PE network policies: Enabled</text>
+  <!-- Tags -->
+  <rect x="24" y="214" width="80" height="56" rx="4" fill="#e8f4fd" stroke="#0078d4" stroke-width="1"/>
+  <rect x="40" y="220" width="24" height="24" rx="3" fill="#107c10"/>
+  <text x="52" y="236" text-anchor="middle" font-size="8" fill="white" font-weight="bold">T</text>
+  <text x="64" y="254" text-anchor="middle" font-size="9" fill="#333">Tags</text>
+  <text x="64" y="264" text-anchor="middle" font-size="9" fill="#555">(Resources)</text>
 
-  <!-- Subnet: Private Endpoints -->
-  <rect x="328" y="158" width="267" height="128" rx="6" fill="#fff4ce" stroke="#f7630c" stroke-width="1.5"/>
-  <rect x="328" y="158" width="267" height="18" rx="3" fill="#f7630c"/>
-  <text x="336" y="170" font-size="10" fill="white" font-weight="bold">private-endpoints  10.226.214.208/28</text>
-  <text x="336" y="188" font-size="9" fill="#555">Range: .208 to .223  (14 usable IPs)</text>
-  <text x="338" y="204" font-size="10" fill="#333">Key Vault PE</text>
-  <text x="338" y="218" font-size="10" fill="#333">Storage blob / file / dfs PE</text>
-  <text x="338" y="232" font-size="10" fill="#333">Container Registry PE</text>
-  <text x="338" y="246" font-size="10" fill="#333">AML Workspace + Notebooks PE</text>
-  <text x="338" y="260" font-size="10" fill="#333">OpenAI / Cognitive Services PE</text>
-  <text x="338" y="275" font-size="9" fill="#888">PE network policies: Disabled</text>
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       RIGHT SIDEBAR — Observability + Resource Group label
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <!-- AI App Resource Group label -->
+  <rect x="1258" y="58" width="132" height="24" rx="4" fill="#0078d4"/>
+  <text x="1324" y="74" text-anchor="middle" font-size="10" fill="white" font-weight="bold">AI App Resource Group</text>
 
-  <!-- Subnet: Databricks Public -->
-  <rect x="60" y="298" width="255" height="88" rx="6" fill="#f3e8ff" stroke="#8764b8" stroke-width="1.5"/>
-  <rect x="60" y="298" width="255" height="18" rx="3" fill="#8764b8"/>
-  <text x="68" y="310" font-size="10" fill="white" font-weight="bold">databricks-public  10.226.214.224/28</text>
-  <text x="68" y="328" font-size="9" fill="#555">Range: .224 to .239  (14 usable IPs)</text>
-  <text x="70" y="344" font-size="10" fill="#333">Reserved - Future Azure Databricks</text>
-  <text x="70" y="359" font-size="9" fill="#888">Service endpoints: Microsoft.Storage</text>
-  <text x="70" y="374" font-size="9" fill="#888">16 IPs pre-allocated</text>
-
-  <!-- Subnet: Databricks Private -->
-  <rect x="328" y="298" width="267" height="88" rx="6" fill="#fce8e8" stroke="#d13438" stroke-width="1.5"/>
-  <rect x="328" y="298" width="267" height="18" rx="3" fill="#d13438"/>
-  <text x="336" y="310" font-size="10" fill="white" font-weight="bold">databricks-private  10.226.214.240/28</text>
-  <text x="336" y="328" font-size="9" fill="#555">Range: .240 to .255  (14 usable IPs)</text>
-  <text x="338" y="344" font-size="10" fill="#333">Reserved - Future Azure Databricks</text>
-  <text x="338" y="359" font-size="9" fill="#888">Service endpoints: Microsoft.Storage</text>
-  <text x="338" y="374" font-size="9" fill="#888">16 IPs pre-allocated</text>
-
-  <!-- VNET Peering callout arrow -->
-  <line x1="305" y1="562" x2="305" y2="648" stroke="#0078d4" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrowBlue)"/>
-  <rect x="90" y="572" width="224" height="34" rx="4" fill="#fff3e0" stroke="#f0a500" stroke-width="1.5"/>
-  <text x="202" y="586" text-anchor="middle" font-size="9" fill="#b8500a" font-weight="bold">VNET Peering - separate step</text>
-  <text x="202" y="599" text-anchor="middle" font-size="9" fill="#b8500a">Run: scripts\setup-peering.ps1</text>
-
-  <!-- ─── AI/ML Services Row ─── -->
-  <rect x="48" y="400" width="560" height="262" rx="6" fill="#f8fbff" stroke="#0078d4" stroke-width="1"/>
-  <text x="56" y="418" font-size="11" fill="#0078d4" font-weight="bold">AI / ML Services  (all via Private Endpoints - subnet .208/28)</text>
-
-  <!-- AML -->
-  <rect x="60" y="425" width="110" height="84" rx="5" fill="white" stroke="#0078d4" stroke-width="1.5"/>
-  <text x="115" y="444" text-anchor="middle" font-size="9" font-weight="bold" fill="#0078d4">Azure ML</text>
-  <text x="115" y="456" text-anchor="middle" font-size="9" fill="#0078d4">Workspace</text>
-  <text x="115" y="470" text-anchor="middle" font-size="8" fill="#555">mlw-ailz-prod-cc</text>
-  <text x="115" y="482" text-anchor="middle" font-size="8" fill="#555">Private Mode</text>
-  <text x="115" y="494" text-anchor="middle" font-size="8" fill="#555">System MI</text>
-  <text x="115" y="506" text-anchor="middle" font-size="8" fill="#888">PE: .208/28</text>
-
-  <!-- OpenAI -->
-  <rect x="182" y="425" width="110" height="84" rx="5" fill="white" stroke="#7a43b6" stroke-width="1.5"/>
-  <text x="237" y="444" text-anchor="middle" font-size="9" font-weight="bold" fill="#7a43b6">Azure OpenAI</text>
-  <text x="237" y="458" text-anchor="middle" font-size="8" fill="#555">oai-ailz-prod-cc</text>
-  <text x="237" y="471" text-anchor="middle" font-size="8" fill="#555">GPT-4 / Embed</text>
-  <text x="237" y="484" text-anchor="middle" font-size="8" fill="#555">Optional module</text>
-  <text x="237" y="497" text-anchor="middle" font-size="8" fill="#888">PE: .208/28</text>
-  <text x="237" y="507" text-anchor="middle" font-size="8" fill="#888">(deploy_openai)</text>
-
-  <!-- Cognitive Services -->
-  <rect x="304" y="425" width="110" height="84" rx="5" fill="white" stroke="#00b294" stroke-width="1.5"/>
-  <text x="359" y="441" text-anchor="middle" font-size="9" font-weight="bold" fill="#00b294">Cognitive</text>
-  <text x="359" y="453" text-anchor="middle" font-size="9" font-weight="bold" fill="#00b294">Services</text>
-  <text x="359" y="467" text-anchor="middle" font-size="8" fill="#555">cog-ailz-prod-cc</text>
-  <text x="359" y="480" text-anchor="middle" font-size="8" fill="#555">Optional module</text>
-  <text x="359" y="493" text-anchor="middle" font-size="8" fill="#888">PE: .208/28</text>
-  <text x="359" y="507" text-anchor="middle" font-size="8" fill="#888">(deploy_cog_svc)</text>
-
-  <!-- Storage -->
-  <rect x="426" y="425" width="110" height="84" rx="5" fill="white" stroke="#106ebe" stroke-width="1.5"/>
-  <text x="481" y="444" text-anchor="middle" font-size="9" font-weight="bold" fill="#106ebe">Storage</text>
-  <text x="481" y="456" text-anchor="middle" font-size="9" fill="#106ebe">ADLS Gen2</text>
-  <text x="481" y="470" text-anchor="middle" font-size="8" fill="#555">stailzprodcc</text>
-  <text x="481" y="482" text-anchor="middle" font-size="8" fill="#555">GRS / HTTPS</text>
-  <text x="481" y="494" text-anchor="middle" font-size="8" fill="#555">HNS Enabled</text>
-  <text x="481" y="506" text-anchor="middle" font-size="8" fill="#888">PE: .208/28</text>
-
-  <!-- Key Vault -->
-  <rect x="60" y="522" width="110" height="84" rx="5" fill="white" stroke="#ffd700" stroke-width="1.5"/>
-  <text x="115" y="541" text-anchor="middle" font-size="9" font-weight="bold" fill="#b8860b">Key Vault</text>
-  <text x="115" y="555" text-anchor="middle" font-size="8" fill="#555">kv-ailz-prod-cc</text>
-  <text x="115" y="568" text-anchor="middle" font-size="8" fill="#555">RBAC Auth</text>
-  <text x="115" y="581" text-anchor="middle" font-size="8" fill="#555">Purge Protected</text>
-  <text x="115" y="594" text-anchor="middle" font-size="8" fill="#555">90-day soft-delete</text>
-  <text x="115" y="604" text-anchor="middle" font-size="8" fill="#888">PE: .208/28</text>
-
-  <!-- Container Registry -->
-  <rect x="182" y="522" width="110" height="84" rx="5" fill="white" stroke="#e81123" stroke-width="1.5"/>
-  <text x="237" y="539" text-anchor="middle" font-size="9" font-weight="bold" fill="#e81123">Container</text>
-  <text x="237" y="551" text-anchor="middle" font-size="9" font-weight="bold" fill="#e81123">Registry</text>
-  <text x="237" y="565" text-anchor="middle" font-size="8" fill="#555">acrailzprodcc</text>
-  <text x="237" y="578" text-anchor="middle" font-size="8" fill="#555">Premium SKU</text>
-  <text x="237" y="591" text-anchor="middle" font-size="8" fill="#555">Admin Disabled</text>
-  <text x="237" y="604" text-anchor="middle" font-size="8" fill="#888">PE: .208/28</text>
-
-  <!-- App Insights -->
-  <rect x="304" y="522" width="110" height="84" rx="5" fill="white" stroke="#7519b5" stroke-width="1.5"/>
-  <text x="359" y="539" text-anchor="middle" font-size="9" font-weight="bold" fill="#7519b5">Application</text>
-  <text x="359" y="551" text-anchor="middle" font-size="9" font-weight="bold" fill="#7519b5">Insights</text>
-  <text x="359" y="565" text-anchor="middle" font-size="8" fill="#555">appi-ailz-prod-cc</text>
-  <text x="359" y="578" text-anchor="middle" font-size="8" fill="#555">Linked to LAW</text>
-  <text x="359" y="591" text-anchor="middle" font-size="8" fill="#555">AML Telemetry</text>
-  <text x="359" y="604" text-anchor="middle" font-size="8" fill="#888">No PE required</text>
-
-  <!-- Log Analytics -->
-  <rect x="426" y="522" width="110" height="84" rx="5" fill="white" stroke="#0078d4" stroke-width="1.5"/>
-  <text x="481" y="539" text-anchor="middle" font-size="9" font-weight="bold" fill="#0078d4">Log Analytics</text>
-  <text x="481" y="553" text-anchor="middle" font-size="8" fill="#555">law-ailz-prod-cc</text>
-  <text x="481" y="566" text-anchor="middle" font-size="8" fill="#555">90-day retention</text>
-  <text x="481" y="579" text-anchor="middle" font-size="8" fill="#555">Private ingestion</text>
-  <text x="481" y="592" text-anchor="middle" font-size="8" fill="#555">All diag to LAW</text>
-  <text x="481" y="604" text-anchor="middle" font-size="8" fill="#888">PerGB2018 SKU</text>
-
-  <!-- ─── Governance & Observability column ─── -->
-  <rect x="625" y="130" width="188" height="430" rx="8" fill="#f8f8f8" stroke="#555" stroke-width="1.5"/>
-  <rect x="625" y="130" width="188" height="20" rx="3" fill="#555"/>
-  <text x="633" y="144" font-size="11" fill="white" font-weight="bold">Governance and Observability</text>
-
-  <!-- Policy -->
-  <rect x="635" y="158" width="168" height="100" rx="5" fill="#fff3cd" stroke="#f0a500" stroke-width="1.5"/>
-  <text x="719" y="175" text-anchor="middle" font-size="10" font-weight="bold" fill="#c87800">Azure Policy</text>
-  <text x="645" y="193" font-size="9" fill="#555">Allowed Locations only:</text>
-  <text x="645" y="206" font-size="9" fill="#555">  canadacentral / canadaeast</text>
-  <text x="645" y="219" font-size="9" fill="#555">  eastus / eastus2</text>
-  <text x="645" y="232" font-size="9" fill="#555">Require HTTPS on Storage</text>
-  <text x="645" y="245" font-size="9" fill="#555">KV Purge Protection required</text>
-  <text x="645" y="257" font-size="9" fill="#555">Deny AML Public Access</text>
+  <!-- Observability panel -->
+  <rect x="1258" y="90" width="132" height="380" rx="6" fill="white" stroke="#ccc" stroke-width="1"/>
+  <text x="1324" y="107" text-anchor="middle" font-size="10" font-weight="bold" fill="#555">Observability</text>
 
   <!-- Monitor -->
-  <rect x="635" y="268" width="168" height="88" rx="5" fill="#dff6dd" stroke="#107c10" stroke-width="1.5"/>
-  <text x="719" y="285" text-anchor="middle" font-size="10" font-weight="bold" fill="#107c10">Azure Monitor</text>
-  <text x="645" y="302" font-size="9" fill="#555">Metric alert rules</text>
-  <text x="645" y="316" font-size="9" fill="#555">Log alert queries</text>
-  <text x="645" y="330" font-size="9" fill="#555">Email action group</text>
-  <text x="645" y="344" font-size="9" fill="#555">Activity Log forwarded to LAW</text>
+  <rect x="1270" y="114" width="108" height="50" rx="4" fill="#e8f4fd" stroke="#0078d4" stroke-width="1"/>
+  <text x="1324" y="134" text-anchor="middle" font-size="9" font-weight="bold" fill="#0078d4">Monitor</text>
+  <text x="1324" y="147" text-anchor="middle" font-size="8" fill="#555">Alert rules</text>
+  <text x="1324" y="158" text-anchor="middle" font-size="8" fill="#555">Action groups</text>
 
-  <!-- RBAC -->
-  <rect x="635" y="366" width="168" height="100" rx="5" fill="#fce8e8" stroke="#d13438" stroke-width="1.5"/>
-  <text x="719" y="383" text-anchor="middle" font-size="10" font-weight="bold" fill="#d13438">RBAC Assignments</text>
-  <text x="645" y="400" font-size="9" fill="#555">Platform Engineers</text>
-  <text x="645" y="412" font-size="9" fill="#555">  Contributor on RG</text>
-  <text x="645" y="425" font-size="9" fill="#555">Data Scientists</text>
-  <text x="645" y="437" font-size="9" fill="#555">  AzureML Data Scientist</text>
-  <text x="645" y="450" font-size="9" fill="#555">  Storage Blob Contributor</text>
-  <text x="645" y="463" font-size="9" fill="#555">See docs\roles.md for all groups</text>
+  <!-- Diagnostic Settings -->
+  <rect x="1270" y="172" width="108" height="50" rx="4" fill="#fff3cd" stroke="#f0a500" stroke-width="1"/>
+  <text x="1324" y="190" text-anchor="middle" font-size="9" font-weight="bold" fill="#b8860b">Diagnostic</text>
+  <text x="1324" y="202" text-anchor="middle" font-size="9" font-weight="bold" fill="#b8860b">Settings</text>
+  <text x="1324" y="214" text-anchor="middle" font-size="8" fill="#555">All resources -> LAW</text>
 
-  <!-- Peering script callout -->
-  <rect x="625" y="476" width="188" height="84" rx="8" fill="#fff3e0" stroke="#f0a500" stroke-width="2"/>
-  <rect x="625" y="476" width="188" height="20" rx="3" fill="#f0a500"/>
-  <text x="719" y="490" text-anchor="middle" font-size="10" fill="white" font-weight="bold">Hub-Spoke Peering</text>
-  <text x="635" y="508" font-size="9" fill="#555">Run AFTER terraform apply:</text>
-  <text x="635" y="521" font-size="9" fill="#8b5000" font-weight="bold">.\scripts\setup-peering.ps1</text>
-  <text x="635" y="534" font-size="9" fill="#555">Requires Az PowerShell module</text>
-  <text x="635" y="547" font-size="9" fill="#555">+ Network Contributor on hub VNet</text>
+  <!-- Network Watcher -->
+  <rect x="1270" y="230" width="108" height="50" rx="4" fill="#dff6dd" stroke="#107c10" stroke-width="1"/>
+  <text x="1324" y="248" text-anchor="middle" font-size="9" font-weight="bold" fill="#107c10">Network</text>
+  <text x="1324" y="260" text-anchor="middle" font-size="9" font-weight="bold" fill="#107c10">Watcher</text>
+  <text x="1324" y="272" text-anchor="middle" font-size="8" fill="#555">Flow logs + NSG</text>
 
-  <!-- ═══════════════════════════════════════════════════ -->
-  <!-- HUB NETWORK (Separate Subscription) -->
-  <!-- ═══════════════════════════════════════════════════ -->
-  <rect x="20" y="665" width="820" height="125" rx="10" fill="none" stroke="#e81123" stroke-width="2" stroke-dasharray="8,4"/>
-  <rect x="20" y="665" width="238" height="22" rx="4" fill="#e81123"/>
-  <text x="30" y="680" font-size="12" fill="white" font-weight="bold">Hub Network Subscription (Existing - Not Deployed)</text>
+  <!-- Application Insights -->
+  <rect x="1270" y="288" width="108" height="50" rx="4" fill="#f3e8ff" stroke="#8764b8" stroke-width="1"/>
+  <text x="1324" y="305" text-anchor="middle" font-size="9" font-weight="bold" fill="#7519b5">Application</text>
+  <text x="1324" y="317" text-anchor="middle" font-size="9" font-weight="bold" fill="#7519b5">Insights</text>
+  <text x="1324" y="329" text-anchor="middle" font-size="8" fill="#555">appi-ailz-prod-cc</text>
+  <text x="1324" y="340" text-anchor="middle" font-size="8" fill="#555">APM + traces</text>
 
-  <rect x="42" y="694" width="162" height="84" rx="5" fill="white" stroke="#e81123" stroke-width="1.5"/>
-  <text x="123" y="711" text-anchor="middle" font-size="10" font-weight="bold" fill="#e81123">Azure Firewall</text>
-  <text x="52" y="727" font-size="9" fill="#555">Force-tunnel spoke egress</text>
-  <text x="52" y="741" font-size="9" fill="#555">IDPS / TLS inspection</text>
-  <text x="52" y="755" font-size="9" fill="#555">Hub DNS resolver IP used as</text>
-  <text x="52" y="769" font-size="9" fill="#888">  spoke dns_servers variable</text>
+  <!-- Log Analytics -->
+  <rect x="1270" y="346" width="108" height="50" rx="4" fill="#e8f4fd" stroke="#0078d4" stroke-width="1"/>
+  <text x="1324" y="363" text-anchor="middle" font-size="9" font-weight="bold" fill="#0078d4">Log Analytics</text>
+  <text x="1324" y="375" text-anchor="middle" font-size="9" font-weight="bold" fill="#0078d4">Workspace</text>
+  <text x="1324" y="387" text-anchor="middle" font-size="8" fill="#555">law-ailz-prod-cc</text>
+  <text x="1324" y="398" text-anchor="middle" font-size="8" fill="#555">90-day retention</text>
 
-  <rect x="216" y="694" width="200" height="84" rx="5" fill="white" stroke="#e81123" stroke-width="1.5"/>
-  <text x="316" y="711" text-anchor="middle" font-size="10" font-weight="bold" fill="#e81123">Private DNS Zones (hub-hosted)</text>
-  <text x="226" y="727" font-size="9" fill="#555">privatelink.vaultcore.azure.net</text>
-  <text x="226" y="741" font-size="9" fill="#555">privatelink.blob.core.windows.net</text>
-  <text x="226" y="755" font-size="9" fill="#555">privatelink.azurecr.io</text>
-  <text x="226" y="769" font-size="9" fill="#555">privatelink.api.azureml.ms  (+more)</text>
+  <!-- Managed Identities -->
+  <rect x="1270" y="404" width="108" height="50" rx="4" fill="#fff3cd" stroke="#f0a500" stroke-width="1"/>
+  <text x="1324" y="421" text-anchor="middle" font-size="9" font-weight="bold" fill="#b8860b">Managed</text>
+  <text x="1324" y="433" text-anchor="middle" font-size="9" font-weight="bold" fill="#b8860b">Identities</text>
+  <text x="1324" y="445" text-anchor="middle" font-size="8" fill="#555">id-foundry / id-apps</text>
+  <text x="1324" y="456" text-anchor="middle" font-size="8" fill="#555">id-build</text>
 
-  <rect x="428" y="694" width="180" height="84" rx="5" fill="white" stroke="#e81123" stroke-width="1.5"/>
-  <text x="518" y="711" text-anchor="middle" font-size="10" font-weight="bold" fill="#e81123">Hub VNET</text>
-  <text x="438" y="727" font-size="9" fill="#555">ExpressRoute / VPN Gateway</text>
-  <text x="438" y="741" font-size="9" fill="#555">Peered to spoke via PS1 script</text>
-  <text x="438" y="755" font-size="9" fill="#555">Spoke egress routes via hub FW</text>
-  <text x="438" y="769" font-size="9" fill="#888">UDR: 0.0.0.0/0 to FW private IP</text>
+  <!-- UDR to hub firewall -->
+  <rect x="1270" y="478" width="108" height="36" rx="4" fill="#fce8e8" stroke="#d13438" stroke-width="1.5"/>
+  <text x="1324" y="493" text-anchor="middle" font-size="9" font-weight="bold" fill="#d13438">UDR to hub</text>
+  <text x="1324" y="505" text-anchor="middle" font-size="9" fill="#d13438">firewall</text>
 
-  <rect x="620" y="694" width="188" height="84" rx="5" fill="white" stroke="#555" stroke-width="1.5"/>
-  <text x="714" y="711" text-anchor="middle" font-size="10" font-weight="bold" fill="#555">Terraform State Storage</text>
-  <text x="630" y="727" font-size="9" fill="#555">sttfstateprodcc  (bootstrap.sh)</text>
-  <text x="630" y="741" font-size="9" fill="#555">GRS | Versioned | HTTPS-only</text>
-  <text x="630" y="755" font-size="9" fill="#555">rg-tfstate-prod-cc</text>
-  <text x="630" y="769" font-size="9" fill="#888">backend.hcl used by terraform init</text>
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       TOP SECTION — AI Foundry Agent Service standard setup
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <rect x="126" y="58" width="1126" height="280" rx="8" fill="white" stroke="#0078d4" stroke-width="1.5"/>
+  <rect x="126" y="58" width="310" height="20" rx="4" fill="#0078d4"/>
+  <text x="136" y="72" font-size="11" fill="white" font-weight="bold">AI Foundry Agent Service standard setup</text>
 
-  <!-- ═══════════════════════════════════════════════════ -->
-  <!-- LEGEND -->
-  <!-- ═══════════════════════════════════════════════════ -->
-  <rect x="855" y="70" width="230" height="720" rx="8" fill="white" stroke="#ccc" stroke-width="1"/>
-  <rect x="855" y="70" width="230" height="22" rx="4" fill="#333"/>
-  <text x="970" y="85" text-anchor="middle" font-size="12" fill="white" font-weight="bold">Legend</text>
+  <!-- Managed Identities badge top-right of Foundry section -->
+  <rect x="920" y="64" width="110" height="22" rx="4" fill="#fff3cd" stroke="#f0a500" stroke-width="1"/>
+  <text x="975" y="78" text-anchor="middle" font-size="9" font-weight="bold" fill="#b8860b">Managed Identities</text>
 
-  <rect x="865" y="102" width="20" height="12" fill="#0078d4" rx="2"/>
-  <text x="892" y="113" font-size="10" fill="#333">Azure Service / Resource</text>
+  <!-- ── AI Foundry Agent Service dependencies (left box) ── -->
+  <rect x="136" y="86" width="400" height="240" rx="6" fill="#f0f8ff" stroke="#0078d4" stroke-width="1"/>
+  <rect x="136" y="86" width="290" height="18" rx="3" fill="#0078d4"/>
+  <text x="144" y="98" font-size="10" fill="white">AI Foundry Agent Service dependencies</text>
 
-  <rect x="865" y="122" width="20" height="12" fill="none" stroke="#0078d4" stroke-width="2" stroke-dasharray="4,2" rx="2"/>
-  <text x="892" y="133" font-size="10" fill="#333">Subscription Boundary</text>
+  <!-- Storage Account -->
+  <rect x="148" y="112" width="88" height="90" rx="5" fill="white" stroke="#106ebe" stroke-width="1.5"/>
+  <rect x="148" y="112" width="88" height="18" rx="3" fill="#106ebe"/>
+  <text x="192" y="124" text-anchor="middle" font-size="9" fill="white" font-weight="bold">Storage</text>
+  <text x="192" y="142" text-anchor="middle" font-size="9" fill="#106ebe">Account</text>
+  <text x="192" y="155" text-anchor="middle" font-size="8" fill="#555">stfndailzprodcc</text>
+  <text x="192" y="167" text-anchor="middle" font-size="8" fill="#555">ADLS Gen2</text>
+  <text x="192" y="178" text-anchor="middle" font-size="8" fill="#555">Artifacts store</text>
+  <text x="192" y="192" text-anchor="middle" font-size="8" fill="#888">PE: .128/27</text>
 
-  <rect x="865" y="142" width="20" height="12" fill="#107c10" rx="2"/>
-  <text x="892" y="153" font-size="10" fill="#333">Subnet (peering policies On)</text>
+  <!-- AI Search -->
+  <rect x="248" y="112" width="88" height="90" rx="5" fill="white" stroke="#e81123" stroke-width="1.5"/>
+  <rect x="248" y="112" width="88" height="18" rx="3" fill="#e81123"/>
+  <text x="292" y="124" text-anchor="middle" font-size="9" fill="white" font-weight="bold">AI Search</text>
+  <text x="292" y="142" text-anchor="middle" font-size="9" fill="#e81123">srch-ailz-prod-cc</text>
+  <text x="292" y="155" text-anchor="middle" font-size="8" fill="#555">Standard SKU</text>
+  <text x="292" y="167" text-anchor="middle" font-size="8" fill="#555">Vector RAG index</text>
+  <text x="292" y="178" text-anchor="middle" font-size="8" fill="#555">Semantic search</text>
+  <text x="292" y="192" text-anchor="middle" font-size="8" fill="#888">PE: .128/27</text>
 
-  <rect x="865" y="162" width="20" height="12" fill="#f7630c" rx="2"/>
-  <text x="892" y="173" font-size="10" fill="#333">Private Endpoints Subnet</text>
+  <!-- Cosmos DB -->
+  <rect x="348" y="112" width="88" height="90" rx="5" fill="white" stroke="#7a43b6" stroke-width="1.5"/>
+  <rect x="348" y="112" width="88" height="18" rx="3" fill="#7a43b6"/>
+  <text x="392" y="124" text-anchor="middle" font-size="9" fill="white" font-weight="bold">Cosmos DB</text>
+  <text x="392" y="142" text-anchor="middle" font-size="9" fill="#7a43b6">cosmos-ailz-prod-cc</text>
+  <text x="392" y="155" text-anchor="middle" font-size="8" fill="#555">NoSQL API</text>
+  <text x="392" y="167" text-anchor="middle" font-size="8" fill="#555">agent-memory DB</text>
+  <text x="392" y="178" text-anchor="middle" font-size="8" fill="#555">app-data DB</text>
+  <text x="392" y="192" text-anchor="middle" font-size="8" fill="#888">PE: .128/27</text>
 
-  <line x1="865" y1="190" x2="885" y2="190" stroke="#0078d4" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arrowBlue)"/>
-  <text x="892" y="195" font-size="10" fill="#333">VNET Peering (PS1 script)</text>
+  <!-- Key Vault (foundry dep) -->
+  <rect x="448" y="112" width="78" height="90" rx="5" fill="white" stroke="#ffd700" stroke-width="1.5"/>
+  <rect x="448" y="112" width="78" height="18" rx="3" fill="#b8860b"/>
+  <text x="487" y="124" text-anchor="middle" font-size="9" fill="white" font-weight="bold">Key Vault</text>
+  <text x="487" y="142" text-anchor="middle" font-size="9" fill="#b8860b">kv-ailz-prod-cc</text>
+  <text x="487" y="155" text-anchor="middle" font-size="8" fill="#555">Premium SKU</text>
+  <text x="487" y="167" text-anchor="middle" font-size="8" fill="#555">RBAC auth</text>
+  <text x="487" y="178" text-anchor="middle" font-size="8" fill="#555">Purge protected</text>
+  <text x="487" y="192" text-anchor="middle" font-size="8" fill="#888">PE: .128/27</text>
 
-  <!-- IP Reference Table -->
-  <line x1="865" y1="205" x2="1075" y2="205" stroke="#ddd" stroke-width="1"/>
-  <text x="865" y="220" font-size="11" fill="#333" font-weight="bold">IP Address Reference</text>
-  <text x="865" y="235" font-size="9" fill="#555" font-weight="bold">VNET:  10.226.214.192/26</text>
-  <text x="865" y="248" font-size="9" fill="#555">       .192 to .255  (64 total IPs)</text>
+  <!-- Foundry-dep label row -->
+  <text x="280" y="222" text-anchor="middle" font-size="9" fill="#888">Foundry Agent Service uses Managed Identity RBAC to access all dependencies</text>
+  <text x="280" y="236" text-anchor="middle" font-size="9" fill="#888">Storage Blob Contributor | Search Index Data Reader | Cosmos DB Contributor | KV Secrets User</text>
+  <text x="280" y="250" text-anchor="middle" font-size="9" fill="#888">All connections via Private Endpoints subnet (10.226.214.128/27)</text>
+  <text x="280" y="268" text-anchor="middle" font-size="9" fill="#888">Connections: conn-openai | conn-search | conn-cosmos  (in AI Foundry Project)</text>
+  <text x="280" y="283" text-anchor="middle" font-size="9" fill="#888">Grounding with Bing (optional deploy_bing_grounding = true)</text>
 
-  <line x1="865" y1="255" x2="1075" y2="255" stroke="#eee" stroke-width="1"/>
-  <text x="865" y="268" font-size="9" fill="#107c10" font-weight="bold">machine-learning     /28</text>
-  <text x="865" y="280" font-size="9" fill="#555">10.226.214.192 to .207</text>
+  <!-- ── Azure AI Foundry Service (right box) ── -->
+  <rect x="546" y="86" width="694" height="240" rx="6" fill="#f0f0ff" stroke="#7a43b6" stroke-width="1.5"/>
+  <rect x="546" y="86" width="220" height="18" rx="3" fill="#7a43b6"/>
+  <text x="554" y="98" font-size="10" fill="white" font-weight="bold">Azure AI Foundry Service</text>
 
-  <line x1="865" y1="287" x2="1075" y2="287" stroke="#eee" stroke-width="1"/>
-  <text x="865" y="300" font-size="9" fill="#f7630c" font-weight="bold">private-endpoints    /28</text>
-  <text x="865" y="312" font-size="9" fill="#555">10.226.214.208 to .223</text>
+  <!-- AI Foundry Hub banner -->
+  <rect x="558" y="110" width="670" height="205" rx="5" fill="white" stroke="#7a43b6" stroke-width="1"/>
+  <rect x="558" y="110" width="150" height="16" rx="3" fill="#7a43b6"/>
+  <text x="566" y="122" font-size="9" fill="white">AI Foundry Hub: aif-ailz-prod-cc</text>
 
-  <line x1="865" y1="319" x2="1075" y2="319" stroke="#eee" stroke-width="1"/>
-  <text x="865" y="332" font-size="9" fill="#8764b8" font-weight="bold">databricks-public    /28</text>
-  <text x="865" y="344" font-size="9" fill="#555">10.226.214.224 to .239</text>
+  <!-- AI Foundry Project inner box -->
+  <rect x="568" y="132" width="652" height="175" rx="4" fill="#f8f0ff" stroke="#7a43b6" stroke-width="1" stroke-dasharray="4,3"/>
+  <rect x="568" y="132" width="130" height="14" rx="2" fill="#8764b8"/>
+  <text x="576" y="142" font-size="9" fill="white">AI Foundry Project: aifp-ailz-prod-cc</text>
 
-  <line x1="865" y1="351" x2="1075" y2="351" stroke="#eee" stroke-width="1"/>
-  <text x="865" y="364" font-size="9" fill="#d13438" font-weight="bold">databricks-private   /28</text>
-  <text x="865" y="376" font-size="9" fill="#555">10.226.214.240 to .255</text>
+  <!-- AI Services endpoints -->
+  <rect x="580" y="152" width="120" height="80" rx="4" fill="white" stroke="#0078d4" stroke-width="1.5"/>
+  <rect x="580" y="152" width="120" height="16" rx="3" fill="#0078d4"/>
+  <text x="640" y="162" text-anchor="middle" font-size="9" fill="white" font-weight="bold">AI Services endpoints</text>
+  <text x="640" y="180" text-anchor="middle" font-size="9" fill="#0078d4">ais-ailz-prod-cc</text>
+  <text x="640" y="193" text-anchor="middle" font-size="8" fill="#555">Cognitive Services</text>
+  <text x="640" y="205" text-anchor="middle" font-size="8" fill="#555">Multi-service acct</text>
+  <text x="640" y="217" text-anchor="middle" font-size="8" fill="#888">PE: .128/27</text>
 
-  <!-- Module list -->
-  <line x1="865" y1="384" x2="1075" y2="384" stroke="#ddd" stroke-width="1"/>
-  <text x="865" y="399" font-size="11" fill="#333" font-weight="bold">Terraform Modules</text>
-  <text x="865" y="415" font-size="10" fill="#555">On  resource_group</text>
-  <text x="865" y="430" font-size="10" fill="#555">On  networking (spoke only)</text>
-  <text x="865" y="445" font-size="10" fill="#555">On  nsg</text>
-  <text x="865" y="460" font-size="10" fill="#555">On  policy</text>
-  <text x="865" y="475" font-size="10" fill="#555">On  log_analytics</text>
-  <text x="865" y="490" font-size="10" fill="#555">On  application_insights</text>
-  <text x="865" y="505" font-size="10" fill="#555">On  key_vault</text>
-  <text x="865" y="520" font-size="10" fill="#555">On  storage</text>
-  <text x="865" y="535" font-size="10" fill="#555">On  container_registry</text>
-  <text x="865" y="550" font-size="10" fill="#555">On  machine_learning</text>
-  <text x="865" y="565" font-size="10" fill="#555">Opt cognitive_services</text>
-  <text x="865" y="580" font-size="10" fill="#555">Opt openai</text>
-  <text x="865" y="595" font-size="10" fill="#555">On  monitor</text>
-  <text x="865" y="610" font-size="10" fill="#555">On  rbac</text>
-  <text x="865" y="628" font-size="9" fill="#888">On = enabled by default</text>
-  <text x="865" y="641" font-size="9" fill="#888">Opt = set deploy_x = true in tfvars</text>
+  <!-- Foundry models -->
+  <rect x="712" y="152" width="120" height="80" rx="4" fill="white" stroke="#7a43b6" stroke-width="1.5"/>
+  <rect x="712" y="152" width="120" height="16" rx="3" fill="#7a43b6"/>
+  <text x="772" y="162" text-anchor="middle" font-size="9" fill="white" font-weight="bold">Foundry models</text>
+  <text x="772" y="180" text-anchor="middle" font-size="9" fill="#7a43b6">oai-ailz-prod-cc</text>
+  <text x="772" y="193" text-anchor="middle" font-size="8" fill="#555">Azure OpenAI</text>
+  <text x="772" y="205" text-anchor="middle" font-size="8" fill="#555">GPT-4 / Embed</text>
+  <text x="772" y="217" text-anchor="middle" font-size="8" fill="#888">PE: .128/27</text>
 
-  <line x1="865" y1="649" x2="1075" y2="649" stroke="#ddd" stroke-width="1"/>
-  <text x="865" y="664" font-size="11" fill="#333" font-weight="bold">Peering - Separate Script</text>
-  <text x="865" y="679" font-size="9" fill="#555">Hub peering NOT managed by</text>
-  <text x="865" y="692" font-size="9" fill="#555">Terraform. Run PS1 script after</text>
-  <text x="865" y="705" font-size="9" fill="#555">terraform apply completes.</text>
-  <text x="865" y="718" font-size="9" fill="#555">Needs Az PowerShell module and</text>
-  <text x="865" y="731" font-size="9" fill="#555">Network Contributor on hub VNet.</text>
+  <!-- Connections -->
+  <rect x="844" y="152" width="120" height="80" rx="4" fill="white" stroke="#107c10" stroke-width="1.5"/>
+  <rect x="844" y="152" width="120" height="16" rx="3" fill="#107c10"/>
+  <text x="904" y="162" text-anchor="middle" font-size="9" fill="white" font-weight="bold">Connections</text>
+  <text x="904" y="178" text-anchor="middle" font-size="8" fill="#333">conn-openai</text>
+  <text x="904" y="190" text-anchor="middle" font-size="8" fill="#333">conn-search</text>
+  <text x="904" y="202" text-anchor="middle" font-size="8" fill="#333">conn-cosmos</text>
+  <text x="904" y="214" text-anchor="middle" font-size="8" fill="#555">Managed Identity</text>
+  <text x="904" y="224" text-anchor="middle" font-size="8" fill="#888">auth via RBAC</text>
 
-  <line x1="865" y1="740" x2="1075" y2="740" stroke="#ddd" stroke-width="1"/>
-  <text x="865" y="754" font-size="9" fill="#888">github.com/Azure/AI-Landing-Zones</text>
-  <text x="865" y="767" font-size="9" fill="#888">Terraform greater than or equal to 1.5</text>
-  <text x="865" y="780" font-size="9" fill="#888">AzureRM provider approx 3.100</text>
+  <!-- Foundry Agent Service -->
+  <rect x="976" y="152" width="128" height="80" rx="4" fill="white" stroke="#e81123" stroke-width="1.5"/>
+  <rect x="976" y="152" width="128" height="16" rx="3" fill="#e81123"/>
+  <text x="1040" y="162" text-anchor="middle" font-size="9" fill="white" font-weight="bold">Foundry Agent Service</text>
+  <text x="1040" y="178" text-anchor="middle" font-size="9" fill="#e81123">aifas-ailz-prod-cc</text>
+  <text x="1040" y="191" text-anchor="middle" font-size="8" fill="#555">Container App</text>
+  <text x="1040" y="203" text-anchor="middle" font-size="8" fill="#555">ai-foundry-agent subnet</text>
+  <text x="1040" y="215" text-anchor="middle" font-size="8" fill="#555">(.160/28)</text>
+  <text x="1040" y="228" text-anchor="middle" font-size="8" fill="#888">Orchestrates tool calls</text>
 
-  <!-- Arrow marker -->
+  <!-- Foundry RBAC note -->
+  <text x="770" y="265" text-anchor="middle" font-size="9" fill="#888">Project scope: model deployments, agent runs, connection access, evaluation</text>
+  <text x="770" y="278" text-anchor="middle" font-size="9" fill="#888">Hub PE in private-endpoints subnet — public_network_access_enabled = false</text>
+  <text x="770" y="292" text-anchor="middle" font-size="9" fill="#888">Foundry MI auto-assigned: Storage Blob Contributor | Search Index Data Reader | KV Secrets User | Cognitive Services OpenAI User</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       MIDDLE SECTION — AI Services Virtual Network
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <rect x="126" y="350" width="1126" height="370" rx="8" fill="none" stroke="#0078d4" stroke-width="2" stroke-dasharray="6,3"/>
+  <rect x="126" y="350" width="400" height="20" rx="4" fill="#0078d4"/>
+  <text x="136" y="364" font-size="11" fill="white" font-weight="bold">AI Services virtual network (region 1 spoke, DNS provided by hub)  10.226.214.128/25</text>
+
+  <!-- Hub peering arrow/label on right side of VNET box -->
+  <text x="1130" y="364" font-size="9" fill="#0078d4">Hub peering</text>
+  <line x1="1176" y1="362" x2="1188" y2="362" stroke="#0078d4" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+  <text x="1130" y="376" font-size="8" fill="#888">setup-peering.ps1</text>
+
+  <!-- ── Jumpbox subnet ── -->
+  <rect x="140" y="378" width="136" height="130" rx="5" fill="#f0fff0" stroke="#107c10" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <rect x="140" y="378" width="136" height="16" rx="3" fill="#107c10"/>
+  <text x="148" y="389" font-size="9" fill="white" font-weight="bold">Jumpbox subnet .216/29</text>
+  <rect x="160" y="400" width="96" height="90" rx="4" fill="white" stroke="#107c10" stroke-width="1.5"/>
+  <text x="208" y="418" text-anchor="middle" font-size="9" font-weight="bold" fill="#107c10">Jump box VM</text>
+  <text x="208" y="432" text-anchor="middle" font-size="8" fill="#555">vm-jumpbox-ailz</text>
+  <text x="208" y="444" text-anchor="middle" font-size="8" fill="#555">Standard_B2s</text>
+  <text x="208" y="456" text-anchor="middle" font-size="8" fill="#555">No public IP</text>
+  <text x="208" y="468" text-anchor="middle" font-size="8" fill="#555">Entra ID login</text>
+  <text x="208" y="480" text-anchor="middle" font-size="8" fill="#888">Bastion / VPN access</text>
+
+  <!-- ── Private Endpoints subnet ── -->
+  <rect x="288" y="378" width="490" height="130" rx="5" fill="#fff8e1" stroke="#f7630c" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <rect x="288" y="378" width="200" height="16" rx="3" fill="#f7630c"/>
+  <text x="296" y="389" font-size="9" fill="white" font-weight="bold">Private Endpoints subnet  10.226.214.128/27  (.128 - .159)</text>
+
+  <!-- Row of PE icons -->
+  <g fill="none" stroke="#f7630c" stroke-width="1">
+    <!-- PE 1-6 row 1 -->
+    <rect x="298" y="400" width="62" height="42" rx="3" fill="#fff3e0"/>
+    <text x="329" y="414" text-anchor="middle" font-size="8" fill="#f7630c" font-weight="bold">PE</text>
+    <text x="329" y="426" text-anchor="middle" font-size="7" fill="#555">Key Vault</text>
+    <text x="329" y="436" text-anchor="middle" font-size="7" fill="#888">vaultcore</text>
+
+    <rect x="368" y="400" width="62" height="42" rx="3" fill="#fff3e0"/>
+    <text x="399" y="414" text-anchor="middle" font-size="8" fill="#f7630c" font-weight="bold">PE</text>
+    <text x="399" y="426" text-anchor="middle" font-size="7" fill="#555">Storage</text>
+    <text x="399" y="436" text-anchor="middle" font-size="7" fill="#888">blob+dfs</text>
+
+    <rect x="438" y="400" width="62" height="42" rx="3" fill="#fff3e0"/>
+    <text x="469" y="414" text-anchor="middle" font-size="8" fill="#f7630c" font-weight="bold">PE</text>
+    <text x="469" y="426" text-anchor="middle" font-size="7" fill="#555">AI Foundry</text>
+    <text x="469" y="436" text-anchor="middle" font-size="7" fill="#888">azureml.ms</text>
+
+    <rect x="508" y="400" width="62" height="42" rx="3" fill="#fff3e0"/>
+    <text x="539" y="414" text-anchor="middle" font-size="8" fill="#f7630c" font-weight="bold">PE</text>
+    <text x="539" y="426" text-anchor="middle" font-size="7" fill="#555">AI Search</text>
+    <text x="539" y="436" text-anchor="middle" font-size="7" fill="#888">search.win</text>
+
+    <rect x="578" y="400" width="62" height="42" rx="3" fill="#fff3e0"/>
+    <text x="609" y="414" text-anchor="middle" font-size="8" fill="#f7630c" font-weight="bold">PE</text>
+    <text x="609" y="426" text-anchor="middle" font-size="7" fill="#555">Cosmos DB</text>
+    <text x="609" y="436" text-anchor="middle" font-size="7" fill="#888">documents</text>
+
+    <rect x="648" y="400" width="62" height="42" rx="3" fill="#fff3e0"/>
+    <text x="679" y="414" text-anchor="middle" font-size="8" fill="#f7630c" font-weight="bold">PE</text>
+    <text x="679" y="426" text-anchor="middle" font-size="7" fill="#555">OpenAI</text>
+    <text x="679" y="436" text-anchor="middle" font-size="7" fill="#888">openai.az</text>
+
+    <!-- PE 7-13 row 2 -->
+    <rect x="298" y="450" width="62" height="42" rx="3" fill="#fff3e0"/>
+    <text x="329" y="464" text-anchor="middle" font-size="8" fill="#f7630c" font-weight="bold">PE</text>
+    <text x="329" y="476" text-anchor="middle" font-size="7" fill="#555">Cognitive</text>
+    <text x="329" y="486" text-anchor="middle" font-size="7" fill="#888">Svcs</text>
+
+    <rect x="368" y="450" width="62" height="42" rx="3" fill="#fff3e0"/>
+    <text x="399" y="464" text-anchor="middle" font-size="8" fill="#f7630c" font-weight="bold">PE</text>
+    <text x="399" y="476" text-anchor="middle" font-size="7" fill="#555">Container</text>
+    <text x="399" y="486" text-anchor="middle" font-size="7" fill="#888">Registry</text>
+
+    <rect x="438" y="450" width="62" height="42" rx="3" fill="#fff3e0"/>
+    <text x="469" y="464" text-anchor="middle" font-size="8" fill="#f7630c" font-weight="bold">PE</text>
+    <text x="469" y="476" text-anchor="middle" font-size="7" fill="#555">App Config</text>
+    <text x="469" y="486" text-anchor="middle" font-size="7" fill="#888">azconfig.io</text>
+
+    <rect x="508" y="450" width="62" height="42" rx="3" fill="#fff3e0"/>
+    <text x="539" y="464" text-anchor="middle" font-size="8" fill="#f7630c" font-weight="bold">PE</text>
+    <text x="539" y="476" text-anchor="middle" font-size="7" fill="#555">APIM</text>
+    <text x="539" y="486" text-anchor="middle" font-size="7" fill="#888">azure-api</text>
+
+    <rect x="578" y="450" width="62" height="42" rx="3" fill="#fff3e0"/>
+    <text x="609" y="464" text-anchor="middle" font-size="8" fill="#f7630c" font-weight="bold">PE</text>
+    <text x="609" y="476" text-anchor="middle" font-size="7" fill="#555">Log Analytics</text>
+    <text x="609" y="486" text-anchor="middle" font-size="7" fill="#888">opinsights</text>
+
+    <rect x="648" y="450" width="62" height="42" rx="3" fill="#fff3e0"/>
+    <text x="679" y="464" text-anchor="middle" font-size="8" fill="#f7630c" font-weight="bold">PE</text>
+    <text x="679" y="476" text-anchor="middle" font-size="7" fill="#555">AML</text>
+    <text x="679" y="486" text-anchor="middle" font-size="7" fill="#888">Workspace</text>
+  </g>
+
+  <!-- ── API Management subnet ── -->
+  <rect x="790" y="378" width="152" height="130" rx="5" fill="#f0f8ff" stroke="#0078d4" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <rect x="790" y="378" width="152" height="16" rx="3" fill="#0078d4"/>
+  <text x="798" y="389" font-size="9" fill="white" font-weight="bold">API Mgmt subnet .176/29</text>
+  <rect x="802" y="400" width="128" height="90" rx="4" fill="white" stroke="#0078d4" stroke-width="1.5"/>
+  <text x="866" y="418" text-anchor="middle" font-size="9" font-weight="bold" fill="#0078d4">API Management</text>
+  <text x="866" y="432" text-anchor="middle" font-size="8" fill="#555">apim-ailz-prod-cc</text>
+  <text x="866" y="444" text-anchor="middle" font-size="8" fill="#555">Internal VNet mode</text>
+  <text x="866" y="456" text-anchor="middle" font-size="8" fill="#555">Rate limit + JWT</text>
+  <text x="866" y="468" text-anchor="middle" font-size="8" fill="#555">Backend routing</text>
+  <text x="866" y="480" text-anchor="middle" font-size="8" fill="#888">AppGW -> APIM -> CAE</text>
+
+  <!-- ── AI Foundry Agent subnet ── -->
+  <rect x="954" y="378" width="152" height="130" rx="5" fill="#fff0f8" stroke="#7a43b6" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <rect x="954" y="378" width="152" height="16" rx="3" fill="#7a43b6"/>
+  <text x="962" y="389" font-size="9" fill="white" font-weight="bold">AI Foundry Agent subnet .160/28</text>
+  <rect x="966" y="400" width="128" height="90" rx="4" fill="white" stroke="#7a43b6" stroke-width="1.5"/>
+  <text x="1030" y="418" text-anchor="middle" font-size="9" font-weight="bold" fill="#7a43b6">Foundry Agent Svc</text>
+  <text x="1030" y="432" text-anchor="middle" font-size="8" fill="#555">aifas-ailz-prod-cc</text>
+  <text x="1030" y="444" text-anchor="middle" font-size="8" fill="#555">Container App</text>
+  <text x="1030" y="456" text-anchor="middle" font-size="8" fill="#555">Workload: Dedicated-D4</text>
+  <text x="1030" y="468" text-anchor="middle" font-size="8" fill="#555">SVC endpoints:</text>
+  <text x="1030" y="478" text-anchor="middle" font-size="8" fill="#888">Storage|KV|CogSvc</text>
+
+  <!-- ── Application Gateway subnet ── -->
+  <rect x="1118" y="378" width="122" height="130" rx="5" fill="#fce8e8" stroke="#e81123" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <rect x="1118" y="378" width="122" height="16" rx="3" fill="#e81123"/>
+  <text x="1126" y="389" font-size="9" fill="white" font-weight="bold">AppGW subnet .192/28</text>
+  <rect x="1128" y="400" width="102" height="45" rx="4" fill="white" stroke="#e81123" stroke-width="1.5"/>
+  <text x="1179" y="414" text-anchor="middle" font-size="9" font-weight="bold" fill="#e81123">App Gateway</text>
+  <text x="1179" y="426" text-anchor="middle" font-size="8" fill="#555">agw-ailz-prod-cc</text>
+  <text x="1179" y="436" text-anchor="middle" font-size="8" fill="#888">WAF_v2 | Public IP</text>
+
+  <rect x="1128" y="452" width="102" height="45" rx="4" fill="white" stroke="#d13438" stroke-width="1.5"/>
+  <text x="1179" y="468" text-anchor="middle" font-size="9" font-weight="bold" fill="#d13438">WAF Policy</text>
+  <text x="1179" y="480" text-anchor="middle" font-size="8" fill="#555">OWASP 3.2</text>
+  <text x="1179" y="490" text-anchor="middle" font-size="8" fill="#888">Prevention mode</text>
+
+  <!-- Second row of subnets -->
+
+  <!-- ── Container App Env subnet ── -->
+  <rect x="288" y="520" width="390" height="186" rx="5" fill="#f0fff0" stroke="#107c10" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <rect x="288" y="520" width="220" height="16" rx="3" fill="#107c10"/>
+  <text x="296" y="531" font-size="9" fill="white" font-weight="bold">Container App Environment subnet  10.226.214.184/29</text>
+
+  <!-- CAE inner box -->
+  <rect x="298" y="540" width="370" height="156" rx="4" fill="white" stroke="#107c10" stroke-width="1"/>
+  <text x="483" y="555" text-anchor="middle" font-size="9" font-weight="bold" fill="#107c10">Container App Environment: cae-ailz-prod-cc  (Dapr-enabled)</text>
+
+  <!-- Dapr label -->
+  <rect x="308" y="560" width="48" height="26" rx="3" fill="#0078d4" stroke="#0078d4"/>
+  <text x="332" y="577" text-anchor="middle" font-size="9" fill="white" font-weight="bold">Dapr</text>
+
+  <!-- Microservices -->
+  <rect x="366" y="560" width="64" height="42" rx="3" fill="#dff6dd" stroke="#107c10" stroke-width="1"/>
+  <text x="398" y="575" text-anchor="middle" font-size="8" font-weight="bold" fill="#107c10">Frontend</text>
+  <text x="398" y="587" text-anchor="middle" font-size="7" fill="#555">ca-frontend</text>
+  <text x="398" y="597" text-anchor="middle" font-size="7" fill="#888">Ingress on</text>
+
+  <rect x="438" y="560" width="64" height="42" rx="3" fill="#dff6dd" stroke="#107c10" stroke-width="1"/>
+  <text x="470" y="575" text-anchor="middle" font-size="8" font-weight="bold" fill="#107c10">Orchestrator</text>
+  <text x="470" y="587" text-anchor="middle" font-size="7" fill="#555">ca-orchestrator</text>
+  <text x="470" y="597" text-anchor="middle" font-size="7" fill="#888">SK/LangChain</text>
+
+  <rect x="510" y="560" width="54" height="42" rx="3" fill="#dff6dd" stroke="#107c10" stroke-width="1"/>
+  <text x="537" y="575" text-anchor="middle" font-size="8" font-weight="bold" fill="#107c10">SK</text>
+  <text x="537" y="587" text-anchor="middle" font-size="7" fill="#555">ca-sk</text>
+  <text x="537" y="597" text-anchor="middle" font-size="7" fill="#888">Plugin host</text>
+
+  <rect x="572" y="560" width="54" height="42" rx="3" fill="#dff6dd" stroke="#107c10" stroke-width="1"/>
+  <text x="599" y="575" text-anchor="middle" font-size="8" font-weight="bold" fill="#107c10">MCP</text>
+  <text x="599" y="587" text-anchor="middle" font-size="7" fill="#555">ca-mcp</text>
+  <text x="599" y="597" text-anchor="middle" font-size="7" fill="#888">Tool server</text>
+
+  <rect x="634" y="560" width="64" height="42" rx="3" fill="#dff6dd" stroke="#107c10" stroke-width="1"/>
+  <text x="666" y="575" text-anchor="middle" font-size="8" font-weight="bold" fill="#107c10">Ingestion</text>
+  <text x="666" y="587" text-anchor="middle" font-size="7" fill="#555">ca-ingestion</text>
+  <text x="666" y="597" text-anchor="middle" font-size="7" fill="#888">RAG pipeline</text>
+
+  <!-- Managed identities badge -->
+  <rect x="308" y="612" width="110" height="20" rx="3" fill="#fff3cd" stroke="#f0a500" stroke-width="1"/>
+  <text x="363" y="625" text-anchor="middle" font-size="8" fill="#b8860b" font-weight="bold">Managed Identities: id-apps-*</text>
+
+  <text x="483" y="650" text-anchor="middle" font-size="8" fill="#888">Dapr: service invocation | pub/sub | state (Cosmos DB) | secrets (Key Vault) | bindings</text>
+  <text x="483" y="662" text-anchor="middle" font-size="8" fill="#888">Apps MI RBAC: Storage Blob Contributor | Cosmos DB Contributor | KV Secrets User | Cognitive Services User</text>
+  <text x="483" y="674" text-anchor="middle" font-size="8" fill="#888">App Configuration endpoint: appcs-ailz-prod-cc  |  PE: .128/27</text>
+  <text x="483" y="686" text-anchor="middle" font-size="8" fill="#888">Container Registry: acrailzprodcc  |  PE: .128/27</text>
+
+  <!-- ── Build Agent subnet ── -->
+  <rect x="790" y="520" width="204" height="186" rx="5" fill="#fff3e0" stroke="#f0a500" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <rect x="790" y="520" width="204" height="16" rx="3" fill="#f0a500"/>
+  <text x="798" y="531" font-size="9" fill="white" font-weight="bold">Build agent subnet  10.226.214.208/29</text>
+  <rect x="806" y="542" width="172" height="128" rx="4" fill="white" stroke="#f0a500" stroke-width="1.5"/>
+  <text x="892" y="560" text-anchor="middle" font-size="9" font-weight="bold" fill="#c87800">Build agent VM</text>
+  <text x="892" y="575" text-anchor="middle" font-size="8" fill="#555">vm-build-ailz-prod-cc</text>
+  <text x="892" y="587" text-anchor="middle" font-size="8" fill="#555">Standard_D4s_v3</text>
+  <text x="892" y="599" text-anchor="middle" font-size="8" fill="#555">Self-hosted CI/CD</text>
+  <text x="892" y="611" text-anchor="middle" font-size="8" fill="#555">Azure DevOps / GHA</text>
+  <rect x="820" y="618" width="144" height="20" rx="3" fill="#fff3cd" stroke="#f0a500" stroke-width="1"/>
+  <text x="892" y="631" text-anchor="middle" font-size="8" fill="#b8860b" font-weight="bold">MI: id-build-* (ACR Push+Pull)</text>
+  <text x="892" y="652" text-anchor="middle" font-size="8" fill="#555">AcrPush | CAE Deploy</text>
+  <text x="892" y="662" text-anchor="middle" font-size="8" fill="#888">No public IP</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       BOTTOM-LEFT — Enterprise & public knowledge sources
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <rect x="126" y="734" width="232" height="150" rx="6" fill="white" stroke="#ccc" stroke-width="1.5"/>
+  <rect x="126" y="734" width="232" height="18" rx="4" fill="#555"/>
+  <text x="242" y="746" text-anchor="middle" font-size="10" fill="white" font-weight="bold">Enterprise and public knowledge sources</text>
+
+  <!-- Grounding with Bing -->
+  <rect x="140" y="758" width="96" height="80" rx="4" fill="#e8f4fd" stroke="#0078d4" stroke-width="1.5"/>
+  <text x="188" y="776" text-anchor="middle" font-size="9" font-weight="bold" fill="#0078d4">Grounding</text>
+  <text x="188" y="789" text-anchor="middle" font-size="9" fill="#0078d4">with Bing</text>
+  <text x="188" y="803" text-anchor="middle" font-size="8" fill="#555">Public web search</text>
+  <text x="188" y="815" text-anchor="middle" font-size="8" fill="#555">Optional module</text>
+  <text x="188" y="828" text-anchor="middle" font-size="8" fill="#888">deploy_bing=true</text>
+
+  <!-- AI Search Service (enterprise) -->
+  <rect x="250" y="758" width="96" height="80" rx="4" fill="#fce8e8" stroke="#e81123" stroke-width="1.5"/>
+  <text x="298" y="776" text-anchor="middle" font-size="9" font-weight="bold" fill="#e81123">AI Search</text>
+  <text x="298" y="789" text-anchor="middle" font-size="9" fill="#e81123">Service</text>
+  <text x="298" y="803" text-anchor="middle" font-size="8" fill="#555">srch-ailz-prod-cc</text>
+  <text x="298" y="815" text-anchor="middle" font-size="8" fill="#555">Shared w/ Foundry</text>
+  <text x="298" y="828" text-anchor="middle" font-size="8" fill="#888">PE: .128/27</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       BOTTOM-MIDDLE — GenAI app dependencies
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <rect x="370" y="734" width="490" height="150" rx="6" fill="white" stroke="#ccc" stroke-width="1.5"/>
+  <rect x="370" y="734" width="490" height="18" rx="4" fill="#555"/>
+  <text x="615" y="746" text-anchor="middle" font-size="10" fill="white" font-weight="bold">GenAI app dependencies</text>
+
+  <!-- Managed Identities row -->
+  <rect x="608" y="754" width="130" height="16" rx="3" fill="#fff3cd" stroke="#f0a500" stroke-width="1"/>
+  <text x="673" y="765" text-anchor="middle" font-size="8" fill="#b8860b" font-weight="bold">Managed Identities: id-apps-*</text>
+
+  <!-- Cosmos DB (GenAI) -->
+  <rect x="382" y="776" width="80" height="96" rx="4" fill="#f3e8ff" stroke="#7a43b6" stroke-width="1.5"/>
+  <text x="422" y="791" text-anchor="middle" font-size="9" font-weight="bold" fill="#7a43b6">Cosmos DB</text>
+  <text x="422" y="804" text-anchor="middle" font-size="8" fill="#555">cosmos-ailz</text>
+  <text x="422" y="816" text-anchor="middle" font-size="8" fill="#555">State + cache</text>
+  <text x="422" y="828" text-anchor="middle" font-size="8" fill="#555">Dapr state store</text>
+  <text x="422" y="840" text-anchor="middle" font-size="8" fill="#555">Shared w/ Foundry</text>
+  <text x="422" y="862" text-anchor="middle" font-size="8" fill="#888">PE: .128/27</text>
+
+  <!-- Key Vault (GenAI) -->
+  <rect x="474" y="776" width="80" height="96" rx="4" fill="#fffde7" stroke="#b8860b" stroke-width="1.5"/>
+  <text x="514" y="791" text-anchor="middle" font-size="9" font-weight="bold" fill="#b8860b">Key Vault</text>
+  <text x="514" y="804" text-anchor="middle" font-size="8" fill="#555">kv-ailz</text>
+  <text x="514" y="816" text-anchor="middle" font-size="8" fill="#555">Secrets store</text>
+  <text x="514" y="828" text-anchor="middle" font-size="8" fill="#555">Dapr secret</text>
+  <text x="514" y="840" text-anchor="middle" font-size="8" fill="#555">Shared w/ Foundry</text>
+  <text x="514" y="862" text-anchor="middle" font-size="8" fill="#888">PE: .128/27</text>
+
+  <!-- Storage (GenAI) -->
+  <rect x="566" y="776" width="80" height="96" rx="4" fill="#e3f2fd" stroke="#106ebe" stroke-width="1.5"/>
+  <text x="606" y="791" text-anchor="middle" font-size="9" font-weight="bold" fill="#106ebe">Storage</text>
+  <text x="606" y="804" text-anchor="middle" font-size="9" fill="#106ebe">Account</text>
+  <text x="606" y="817" text-anchor="middle" font-size="8" fill="#555">stailzprodcc</text>
+  <text x="606" y="829" text-anchor="middle" font-size="8" fill="#555">Artifacts</text>
+  <text x="606" y="841" text-anchor="middle" font-size="8" fill="#555">Shared w/ Foundry</text>
+  <text x="606" y="862" text-anchor="middle" font-size="8" fill="#888">PE: .128/27</text>
+
+  <!-- Container Registry -->
+  <rect x="658" y="776" width="80" height="96" rx="4" fill="#fce8e8" stroke="#e81123" stroke-width="1.5"/>
+  <text x="698" y="791" text-anchor="middle" font-size="9" font-weight="bold" fill="#e81123">Container</text>
+  <text x="698" y="803" text-anchor="middle" font-size="9" font-weight="bold" fill="#e81123">Registry</text>
+  <text x="698" y="817" text-anchor="middle" font-size="8" fill="#555">acrailzprodcc</text>
+  <text x="698" y="829" text-anchor="middle" font-size="8" fill="#555">Premium SKU</text>
+  <text x="698" y="841" text-anchor="middle" font-size="8" fill="#555">Microservice imgs</text>
+  <text x="698" y="862" text-anchor="middle" font-size="8" fill="#888">PE: .128/27</text>
+
+  <!-- App Configuration -->
+  <rect x="750" y="776" width="96" height="96" rx="4" fill="#e8f4fd" stroke="#0078d4" stroke-width="1.5"/>
+  <text x="798" y="791" text-anchor="middle" font-size="9" font-weight="bold" fill="#0078d4">App</text>
+  <text x="798" y="803" text-anchor="middle" font-size="9" font-weight="bold" fill="#0078d4">Configuration</text>
+  <text x="798" y="817" text-anchor="middle" font-size="8" fill="#555">appcs-ailz</text>
+  <text x="798" y="829" text-anchor="middle" font-size="8" fill="#555">Feature flags</text>
+  <text x="798" y="841" text-anchor="middle" font-size="8" fill="#555">App settings</text>
+  <text x="798" y="853" text-anchor="middle" font-size="8" fill="#555">All microservices</text>
+  <text x="798" y="862" text-anchor="middle" font-size="8" fill="#888">PE: .128/27</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       BOTTOM-RIGHT — GenAI app microservices (Application Stamp Region 1)
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <rect x="872" y="734" width="376" height="150" rx="6" fill="white" stroke="#ccc" stroke-width="1.5"/>
+  <rect x="872" y="734" width="200" height="18" rx="4" fill="#555"/>
+  <text x="972" y="746" text-anchor="middle" font-size="10" fill="white" font-weight="bold">GenAI app microservices</text>
+  <!-- Application Stamp label -->
+  <rect x="1180" y="734" width="68" height="36" rx="4" fill="#0078d4"/>
+  <text x="1214" y="747" text-anchor="middle" font-size="8" fill="white" font-weight="bold">Application</text>
+  <text x="1214" y="759" text-anchor="middle" font-size="8" fill="white" font-weight="bold">Stamp</text>
+  <text x="1214" y="771" text-anchor="middle" font-size="8" fill="white">Region 1</text>
+
+  <!-- Managed Identities badge -->
+  <rect x="990" y="754" width="130" height="16" rx="3" fill="#fff3cd" stroke="#f0a500" stroke-width="1"/>
+  <text x="1055" y="765" text-anchor="middle" font-size="8" fill="#b8860b" font-weight="bold">Managed Identities: id-apps-*</text>
+
+  <!-- Container App Environment inner box -->
+  <rect x="884" y="774" width="288" height="100" rx="4" fill="#f0fff0" stroke="#107c10" stroke-width="1"/>
+  <text x="1028" y="790" text-anchor="middle" font-size="9" font-weight="bold" fill="#107c10">Container App Environment: cae-ailz-prod-cc</text>
+
+  <!-- Dapr -->
+  <rect x="896" y="796" width="42" height="22" rx="3" fill="#0078d4"/>
+  <text x="917" y="811" text-anchor="middle" font-size="9" fill="white" font-weight="bold">dapr</text>
+
+  <!-- 5 microservices -->
+  <rect x="946" y="796" width="42" height="22" rx="3" fill="#dff6dd" stroke="#107c10"/>
+  <text x="967" y="811" text-anchor="middle" font-size="8" fill="#107c10">Frontend</text>
+
+  <rect x="996" y="796" width="52" height="22" rx="3" fill="#dff6dd" stroke="#107c10"/>
+  <text x="1022" y="811" text-anchor="middle" font-size="8" fill="#107c10">Orchestrator</text>
+
+  <rect x="1056" y="796" width="36" height="22" rx="3" fill="#dff6dd" stroke="#107c10"/>
+  <text x="1074" y="811" text-anchor="middle" font-size="8" fill="#107c10">SK</text>
+
+  <rect x="1100" y="796" width="38" height="22" rx="3" fill="#dff6dd" stroke="#107c10"/>
+  <text x="1119" y="811" text-anchor="middle" font-size="8" fill="#107c10">MCP</text>
+
+  <rect x="1146" y="796" width="48" height="22" rx="3" fill="#dff6dd" stroke="#107c10"/>
+  <text x="1170" y="811" text-anchor="middle" font-size="8" fill="#107c10">Ingestion</text>
+
+  <text x="1028" y="840" text-anchor="middle" font-size="8" fill="#888">subnet: container-app-environment (10.226.214.184/29)</text>
+  <text x="1028" y="853" text-anchor="middle" font-size="8" fill="#888">Dapr state: Cosmos DB | secrets: Key Vault | pub/sub: Service Bus</text>
+  <text x="1028" y="866" text-anchor="middle" font-size="8" fill="#888">Images from: acrailzprodcc  |  Settings: appcs-ailz-prod-cc</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       BOTTOM — Security & Governance
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <rect x="126" y="898" width="1126" height="145" rx="6" fill="white" stroke="#555" stroke-width="1.5"/>
+  <rect x="126" y="898" width="200" height="18" rx="4" fill="#555"/>
+  <text x="226" y="910" text-anchor="middle" font-size="10" fill="white" font-weight="bold">Security and governance</text>
+
+  <!-- Subscription policy assignments -->
+  <rect x="164" y="924" width="160" height="108" rx="5" fill="#fff3cd" stroke="#f0a500" stroke-width="1.5"/>
+  <text x="244" y="940" text-anchor="middle" font-size="9" font-weight="bold" fill="#c87800">Subscription policy</text>
+  <text x="244" y="952" text-anchor="middle" font-size="9" font-weight="bold" fill="#c87800">assignments</text>
+  <text x="244" y="968" text-anchor="middle" font-size="8" fill="#555">Allowed locations</text>
+  <text x="244" y="980" text-anchor="middle" font-size="8" fill="#555">Deny public AI access</text>
+  <text x="244" y="992" text-anchor="middle" font-size="8" fill="#555">Require HTTPS storage</text>
+  <text x="244" y="1004" text-anchor="middle" font-size="8" fill="#555">KV purge protection</text>
+  <text x="244" y="1016" text-anchor="middle" font-size="8" fill="#555">Required tags</text>
+
+  <!-- Defender for Cloud -->
+  <rect x="344" y="924" width="200" height="108" rx="5" fill="#fce8e8" stroke="#d13438" stroke-width="1.5"/>
+  <text x="444" y="940" text-anchor="middle" font-size="9" font-weight="bold" fill="#d13438">Defender for Cloud</text>
+  <text x="444" y="955" text-anchor="middle" font-size="8" fill="#555">Defender for AI (preview)</text>
+  <text x="444" y="967" text-anchor="middle" font-size="8" fill="#555">Defender for Containers</text>
+  <text x="444" y="979" text-anchor="middle" font-size="8" fill="#555">Defender for Key Vaults</text>
+  <text x="444" y="991" text-anchor="middle" font-size="8" fill="#555">Defender for Storage</text>
+  <text x="444" y="1003" text-anchor="middle" font-size="8" fill="#555">Defender for App Services</text>
+  <text x="444" y="1015" text-anchor="middle" font-size="8" fill="#555">CSPM continuous posture</text>
+  <text x="444" y="1027" text-anchor="middle" font-size="8" fill="#888">MCSB compliance reports</text>
+
+  <!-- Entra ID -->
+  <rect x="564" y="924" width="200" height="108" rx="5" fill="#e8f4fd" stroke="#0078d4" stroke-width="1.5"/>
+  <text x="664" y="940" text-anchor="middle" font-size="9" font-weight="bold" fill="#0078d4">Entra ID</text>
+  <text x="664" y="955" text-anchor="middle" font-size="8" fill="#555">Managed Identity RBAC</text>
+  <text x="664" y="967" text-anchor="middle" font-size="8" fill="#555">AAD group role assignments</text>
+  <text x="664" y="979" text-anchor="middle" font-size="8" fill="#555">VM Entra ID login ext</text>
+  <text x="664" y="991" text-anchor="middle" font-size="8" fill="#555">Conditional Access policies</text>
+  <text x="664" y="1003" text-anchor="middle" font-size="8" fill="#555">PIM for privileged roles</text>
+  <text x="664" y="1015" text-anchor="middle" font-size="8" fill="#555">Workload Identity federation</text>
+  <text x="664" y="1027" text-anchor="middle" font-size="8" fill="#888">See docs\roles.md</text>
+
+  <!-- Purview -->
+  <rect x="784" y="924" width="200" height="108" rx="5" fill="#f3e8ff" stroke="#8764b8" stroke-width="1.5"/>
+  <text x="884" y="940" text-anchor="middle" font-size="9" font-weight="bold" fill="#7519b5">Microsoft Purview</text>
+  <text x="884" y="955" text-anchor="middle" font-size="8" fill="#555">Data governance platform</text>
+  <text x="884" y="967" text-anchor="middle" font-size="8" fill="#555">Data catalog and lineage</text>
+  <text x="884" y="979" text-anchor="middle" font-size="8" fill="#555">Sensitivity labelling</text>
+  <text x="884" y="991" text-anchor="middle" font-size="8" fill="#555">Information protection</text>
+  <text x="884" y="1003" text-anchor="middle" font-size="8" fill="#555">Compliance manager</text>
+  <text x="884" y="1015" text-anchor="middle" font-size="8" fill="#555">pview-ailz-prod-cc</text>
+  <text x="884" y="1027" text-anchor="middle" font-size="8" fill="#888">deploy_security_governance</text>
+
+  <!-- Terraform / IaC notes -->
+  <rect x="1004" y="924" width="230" height="108" rx="5" fill="#f8f8f8" stroke="#555" stroke-width="1"/>
+  <text x="1119" y="940" text-anchor="middle" font-size="9" font-weight="bold" fill="#555">Deployment Notes</text>
+  <text x="1012" y="956" font-size="8" fill="#555">1. Run scripts\bootstrap.sh (state storage)</text>
+  <text x="1012" y="969" font-size="8" fill="#555">2. copy tfvars.example terraform.tfvars</text>
+  <text x="1012" y="982" font-size="8" fill="#555">3. terraform init -backend-config=backend.hcl</text>
+  <text x="1012" y="995" font-size="8" fill="#555">4. terraform plan -var-file=terraform.tfvars</text>
+  <text x="1012" y="1008" font-size="8" fill="#555">5. terraform apply</text>
+  <text x="1012" y="1021" font-size="8" fill="#555">6. .\scripts\setup-peering.ps1  (hub peering)</text>
+  <text x="1012" y="1034" font-size="8" fill="#888">Terraform >= 1.5 | AzureRM ~> 3.100</text>
+
+  <!-- ═══════ ARROW DEFS ═══════ -->
   <defs>
-    <marker id="arrowBlue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L8,3 z" fill="#0078d4"/>
+    <marker id="arrowBlue" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto">
+      <path d="M0,0 L0,5 L7,2.5 z" fill="#0078d4"/>
     </marker>
   </defs>
 </svg>

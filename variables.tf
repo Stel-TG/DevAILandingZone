@@ -97,40 +97,94 @@ variable "deploy_openai"               { type = bool; default = false; descripti
 variable "deploy_private_endpoints"    { type = bool; default = true;  description = "Deploy private endpoints for all services." }
 variable "deploy_rbac"                 { type = bool; default = true;  description = "Deploy RBAC role assignments for team groups." }
 
+# AI Foundry and new services (from reference architecture screenshot)
+variable "deploy_ai_foundry"           { type = bool; default = true;  description = "Deploy Azure AI Foundry Service, Project, and Agent Service." }
+variable "deploy_ai_search"            { type = bool; default = true;  description = "Deploy Azure AI Search (AI Foundry Agent Service dependency)." }
+variable "deploy_cosmos_db"            { type = bool; default = true;  description = "Deploy Azure Cosmos DB (AI Foundry and GenAI app dependency)." }
+variable "deploy_container_app_env"    { type = bool; default = true;  description = "Deploy Container App Environment with GenAI microservices." }
+variable "deploy_app_configuration"    { type = bool; default = true;  description = "Deploy Azure App Configuration for GenAI app settings." }
+variable "deploy_api_management"       { type = bool; default = true;  description = "Deploy Azure API Management in internal VNet mode." }
+variable "deploy_jumpbox"              { type = bool; default = true;  description = "Deploy jump box VM for secure administrative access." }
+variable "deploy_app_gateway"          { type = bool; default = true;  description = "Deploy Application Gateway with WAF for ingress." }
+variable "deploy_build_agent"          { type = bool; default = true;  description = "Deploy self-hosted build agent VM in build-agent subnet." }
+variable "deploy_security_governance"  { type = bool; default = true;  description = "Deploy Defender for Cloud, Purview, and Entra ID integration." }
+variable "deploy_managed_identity"     { type = bool; default = true;  description = "Deploy user-assigned managed identities for workloads." }
+variable "deploy_network_watcher"      { type = bool; default = true;  description = "Deploy Network Watcher for flow logs and diagnostics." }
+
 # -----------------------------------------------------------------------------
 # NETWORKING VARIABLES
 # -----------------------------------------------------------------------------
 variable "vnet_address_space" {
-  description = "CIDR address space for the spoke VNET. 10.226.214.192/26 = 64 IPs (.192–.255)."
+  description = "CIDR address space for the spoke VNET. Extended to /25 (128 IPs) to accommodate all AI Landing Zone subnets."
   type        = list(string)
-  default     = ["10.226.214.192/26"]
+  default     = ["10.226.214.128/25"]
 }
 
 variable "subnets" {
-  description = "Map of subnet definitions. Each subnet requires name, prefix, and service_endpoints."
+  description = "Map of subnet definitions. Eight /27 or /28 subnets carved from the /25 address space."
   type = map(object({
     address_prefix    = string
     service_endpoints = list(string)
   }))
   default = {
-    # Four /28 subnets (16 IPs each) carved from 10.226.214.192/26
-    "machine-learning" = {
-      # 10.226.214.192 – 10.226.214.207  (14 usable)
-      address_prefix    = "10.226.214.192/28"
-      service_endpoints = ["Microsoft.Storage", "Microsoft.ContainerRegistry", "Microsoft.KeyVault", "Microsoft.MachineLearningServices"]
-    }
+    # ── Core private endpoints ─────────────────────────────────────────────────
     "private-endpoints" = {
-      # 10.226.214.208 – 10.226.214.223  (14 usable)
-      address_prefix    = "10.226.214.208/28"
+      # 10.226.214.128 – 10.226.214.159  (30 usable) — all service private endpoints
+      address_prefix    = "10.226.214.128/27"
       service_endpoints = []
     }
+
+    # ── AI Foundry Agent ───────────────────────────────────────────────────────
+    "ai-foundry-agent" = {
+      # 10.226.214.160 – 10.226.214.175  (14 usable) — AI Foundry Agent Service
+      address_prefix    = "10.226.214.160/28"
+      service_endpoints = ["Microsoft.Storage", "Microsoft.KeyVault", "Microsoft.CognitiveServices"]
+    }
+
+    # ── API Management ─────────────────────────────────────────────────────────
+    "api-management" = {
+      # 10.226.214.176 – 10.226.214.183  (6 usable) — APIM internal VNet mode
+      address_prefix    = "10.226.214.176/29"
+      service_endpoints = ["Microsoft.Storage", "Microsoft.Sql", "Microsoft.EventHub"]
+    }
+
+    # ── Container App Environment ──────────────────────────────────────────────
+    "container-app-environment" = {
+      # 10.226.214.184 – 10.226.214.191  (6 usable) — Container Apps Environment
+      # Note: for production scale, increase to /27 and adjust address plan
+      address_prefix    = "10.226.214.184/29"
+      service_endpoints = ["Microsoft.Storage", "Microsoft.ContainerRegistry"]
+    }
+
+    # ── Application Gateway / WAF ──────────────────────────────────────────────
+    "application-gateway" = {
+      # 10.226.214.192 – 10.226.214.207  (14 usable) — AppGW requires dedicated subnet
+      address_prefix    = "10.226.214.192/28"
+      service_endpoints = []
+    }
+
+    # ── Build agent ────────────────────────────────────────────────────────────
+    "build-agent" = {
+      # 10.226.214.208 – 10.226.214.215  (6 usable) — self-hosted build agent VM
+      address_prefix    = "10.226.214.208/29"
+      service_endpoints = ["Microsoft.Storage", "Microsoft.ContainerRegistry"]
+    }
+
+    # ── Jump box ───────────────────────────────────────────────────────────────
+    "jumpbox" = {
+      # 10.226.214.216 – 10.226.214.223  (6 usable) — admin jump box VM
+      address_prefix    = "10.226.214.216/29"
+      service_endpoints = []
+    }
+
+    # ── Databricks (reserved) ──────────────────────────────────────────────────
     "databricks-public" = {
-      # 10.226.214.224 – 10.226.214.239  (14 usable) – reserved for future Databricks
+      # 10.226.214.224 – 10.226.214.239  (14 usable) — reserved, future use
       address_prefix    = "10.226.214.224/28"
       service_endpoints = ["Microsoft.Storage"]
     }
     "databricks-private" = {
-      # 10.226.214.240 – 10.226.214.255  (14 usable) – reserved for future Databricks
+      # 10.226.214.240 – 10.226.214.255  (14 usable) — reserved, future use
       address_prefix    = "10.226.214.240/28"
       service_endpoints = ["Microsoft.Storage"]
     }
@@ -220,3 +274,289 @@ variable "platform_admin_group_id"   { type = string; default = null; descriptio
 variable "existing_key_vault_id"    { type = string; default = null; description = "Existing Key Vault ID if deploy_key_vault is false." }
 variable "existing_storage_id"      { type = string; default = null; description = "Existing Storage Account ID if deploy_storage is false." }
 variable "existing_app_insights_id" { type = string; default = null; description = "Existing App Insights ID if deploy_application_insights is false." }
+
+# -----------------------------------------------------------------------------
+# AI FOUNDRY VARIABLES
+# -----------------------------------------------------------------------------
+variable "ai_foundry_display_name" {
+  description = "Display name for the Azure AI Foundry hub resource."
+  type        = string
+  default     = "AI Foundry Hub"
+}
+
+variable "ai_foundry_project_name" {
+  description = "Name of the AI Foundry Project within the hub."
+  type        = string
+  default     = "GenAI Platform"
+}
+
+variable "ai_foundry_sku" {
+  description = "SKU for the AI Foundry (Azure AI Hub) resource."
+  type        = string
+  default     = "Basic"
+}
+
+# -----------------------------------------------------------------------------
+# AI SEARCH VARIABLES
+# -----------------------------------------------------------------------------
+variable "ai_search_sku" {
+  description = "SKU for Azure AI Search. Standard or higher required for semantic search."
+  type        = string
+  default     = "standard"
+  validation {
+    condition     = contains(["free", "basic", "standard", "standard2", "standard3"], var.ai_search_sku)
+    error_message = "ai_search_sku must be one of: free, basic, standard, standard2, standard3."
+  }
+}
+
+variable "ai_search_replica_count" {
+  description = "Number of replicas for Azure AI Search. Minimum 2 for HA in production."
+  type        = number
+  default     = 1
+}
+
+variable "ai_search_partition_count" {
+  description = "Number of partitions for Azure AI Search."
+  type        = number
+  default     = 1
+}
+
+# -----------------------------------------------------------------------------
+# COSMOS DB VARIABLES
+# -----------------------------------------------------------------------------
+variable "cosmos_db_offer_type" {
+  description = "Cosmos DB offer type. Standard is the only option currently."
+  type        = string
+  default     = "Standard"
+}
+
+variable "cosmos_db_kind" {
+  description = "Cosmos DB account kind: GlobalDocumentDB (NoSQL), MongoDB, Parse."
+  type        = string
+  default     = "GlobalDocumentDB"
+}
+
+variable "cosmos_db_consistency_level" {
+  description = "Default consistency level for Cosmos DB."
+  type        = string
+  default     = "Session"
+}
+
+variable "cosmos_db_databases" {
+  description = "Map of Cosmos DB databases and containers to create for GenAI workloads."
+  type = map(object({
+    throughput  = number
+    containers  = list(string)
+  }))
+  default = {
+    "agent-memory" = {
+      throughput = 400
+      containers = ["sessions", "history", "entities"]
+    }
+    "app-data" = {
+      throughput = 400
+      containers = ["configs", "results"]
+    }
+  }
+}
+
+# -----------------------------------------------------------------------------
+# CONTAINER APP ENVIRONMENT VARIABLES
+# -----------------------------------------------------------------------------
+variable "container_app_environment_sku" {
+  description = "Container App Environment SKU: Consumption or Premium."
+  type        = string
+  default     = "Consumption"
+}
+
+variable "container_app_microservices" {
+  description = "Map of GenAI microservice container apps to deploy in the environment."
+  type = map(object({
+    image            = string
+    cpu              = number
+    memory           = string
+    min_replicas     = number
+    max_replicas     = number
+    ingress_enabled  = bool
+  }))
+  default = {
+    "frontend" = {
+      image           = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+      cpu             = 0.5
+      memory          = "1.0Gi"
+      min_replicas    = 1
+      max_replicas    = 10
+      ingress_enabled = true
+    }
+    "orchestrator" = {
+      image           = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+      cpu             = 0.5
+      memory          = "1.0Gi"
+      min_replicas    = 1
+      max_replicas    = 5
+      ingress_enabled = false
+    }
+    "sk-agent" = {
+      image           = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+      cpu             = 1.0
+      memory          = "2.0Gi"
+      min_replicas    = 1
+      max_replicas    = 10
+      ingress_enabled = false
+    }
+    "mcp-server" = {
+      image           = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+      cpu             = 0.5
+      memory          = "1.0Gi"
+      min_replicas    = 1
+      max_replicas    = 5
+      ingress_enabled = false
+    }
+    "ingestion" = {
+      image           = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+      cpu             = 1.0
+      memory          = "2.0Gi"
+      min_replicas    = 0
+      max_replicas    = 5
+      ingress_enabled = false
+    }
+  }
+}
+
+# -----------------------------------------------------------------------------
+# API MANAGEMENT VARIABLES
+# -----------------------------------------------------------------------------
+variable "apim_sku" {
+  description = "APIM SKU. Developer for non-prod; Premium for production VNet integration."
+  type        = string
+  default     = "Developer"
+  validation {
+    condition     = contains(["Developer", "Basic", "Standard", "Premium", "Consumption"], var.apim_sku)
+    error_message = "apim_sku must be Developer, Basic, Standard, Premium, or Consumption."
+  }
+}
+
+variable "apim_publisher_name" {
+  description = "Publisher name for Azure API Management."
+  type        = string
+  default     = "AI Platform Team"
+}
+
+variable "apim_publisher_email" {
+  description = "Publisher email for Azure API Management notifications."
+  type        = string
+  default     = "platform-team@example.com"
+}
+
+# -----------------------------------------------------------------------------
+# APPLICATION GATEWAY / WAF VARIABLES
+# -----------------------------------------------------------------------------
+variable "app_gateway_sku_name" {
+  description = "Application Gateway SKU name."
+  type        = string
+  default     = "WAF_v2"
+}
+
+variable "app_gateway_sku_tier" {
+  description = "Application Gateway SKU tier."
+  type        = string
+  default     = "WAF_v2"
+}
+
+variable "app_gateway_capacity" {
+  description = "Number of Application Gateway instances. Min 2 for HA."
+  type        = number
+  default     = 2
+}
+
+variable "waf_mode" {
+  description = "WAF mode: Detection (log only) or Prevention (block)."
+  type        = string
+  default     = "Prevention"
+}
+
+# -----------------------------------------------------------------------------
+# JUMP BOX VARIABLES
+# -----------------------------------------------------------------------------
+variable "jumpbox_vm_size" {
+  description = "VM size for the jump box. Standard_B2s is sufficient for admin access."
+  type        = string
+  default     = "Standard_B2s"
+}
+
+variable "jumpbox_admin_username" {
+  description = "Admin username for the jump box VM."
+  type        = string
+  default     = "azureadmin"
+}
+
+variable "jumpbox_os_disk_type" {
+  description = "OS disk storage type for jump box VM."
+  type        = string
+  default     = "Standard_LRS"
+}
+
+# -----------------------------------------------------------------------------
+# BUILD AGENT VARIABLES
+# -----------------------------------------------------------------------------
+variable "build_agent_vm_size" {
+  description = "VM size for the self-hosted build agent VM."
+  type        = string
+  default     = "Standard_D4s_v3"
+}
+
+variable "build_agent_admin_username" {
+  description = "Admin username for the build agent VM."
+  type        = string
+  default     = "azureadmin"
+}
+
+# -----------------------------------------------------------------------------
+# MANAGED IDENTITY VARIABLES
+# -----------------------------------------------------------------------------
+variable "managed_identity_names" {
+  description = "List of user-assigned managed identity names to create for workload use."
+  type        = list(string)
+  default     = ["id-ai-foundry", "id-container-apps", "id-build-agent"]
+}
+
+# -----------------------------------------------------------------------------
+# SECURITY & GOVERNANCE VARIABLES
+# -----------------------------------------------------------------------------
+variable "defender_for_cloud_plans" {
+  description = "List of Defender for Cloud plans to enable on the subscription."
+  type        = list(string)
+  default = [
+    "VirtualMachines",
+    "ContainerRegistry",
+    "KeyVaults",
+    "StorageAccounts",
+    "AppServices"
+  ]
+}
+
+variable "purview_account_name" {
+  description = "Override name for Microsoft Purview account. Leave empty to use naming convention."
+  type        = string
+  default     = ""
+}
+
+# -----------------------------------------------------------------------------
+# BING GROUNDING VARIABLES
+# -----------------------------------------------------------------------------
+variable "deploy_bing_grounding" {
+  description = "Deploy Bing Search resource for enterprise knowledge grounding in GenAI apps."
+  type        = bool
+  default     = false
+}
+
+# -----------------------------------------------------------------------------
+# VM ACCESS VARIABLES
+# SSH public key used by both the jump box and build agent VMs.
+# Generate with: ssh-keygen -t rsa -b 4096 -f ~/.ssh/ailz_id_rsa
+# -----------------------------------------------------------------------------
+variable "admin_ssh_public_key" {
+  description = "SSH public key for admin access to jump box and build agent VMs."
+  type        = string
+  default     = "ssh-rsa AAAA...replace-with-your-public-key"
+}
