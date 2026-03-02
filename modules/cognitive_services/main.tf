@@ -28,6 +28,12 @@ resource "azurerm_monitor_diagnostic_setting" "ais" {
   target_resource_id         = azurerm_cognitive_account.this.id
   log_analytics_workspace_id = var.log_analytics_workspace_id
 
-  enabled_log { category = "Audit" }
-  metric { category = "AllMetrics"; enabled = true }
+  enabled_log {
+    category = "Audit"
+  }
+
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
 }

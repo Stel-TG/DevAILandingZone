@@ -1,0 +1,289 @@
+###############################################################################
+# TERRAFORM VARIABLE VALUES - EXAMPLE
+#
+# Copy this file to terraform.tfvars and populate with your actual values.
+#   Windows:  copy terraform.tfvars.example terraform.tfvars
+#   Linux:    cp   terraform.tfvars.example  terraform.tfvars
+#
+# terraform.tfvars is listed in .gitignore - never commit it.
+# Sensitive values (subscription IDs, tenant ID, SSH keys) must be replaced.
+###############################################################################
+
+# =============================================================================
+# CORE ENVIRONMENT
+# =============================================================================
+project_name   = "ailz"           # Max 10 lowercase alphanumeric chars
+environment    = "prod"           # dev | test | staging | prod
+location       = "canadacentral"  # Primary region
+location_short = "cc"             # cc | ce | eu | eu2
+cost_center    = "CC-12345"
+owner_email    = "platform-team@contoso.com"
+
+# =============================================================================
+# SUBSCRIPTIONS & TENANT  (replace with real GUIDs)
+# =============================================================================
+spoke_subscription_id = "00000000-0000-0000-0000-000000000000"
+hub_subscription_id   = "11111111-1111-1111-1111-111111111111"
+tenant_id             = "22222222-2222-2222-2222-222222222222"
+
+# =============================================================================
+# MODULE FEATURE FLAGS
+# Set any flag to false to skip that component (e.g. phased rollout).
+# =============================================================================
+
+# Foundation
+deploy_policy               = true
+
+# Effect for all "Deny Public Network Access" policy assignments.
+# Switch to "Audit" when onboarding existing resources before enforcing Deny.
+deny_public_access_effect = "Deny"
+deploy_log_analytics        = true
+deploy_monitor              = true
+deploy_application_insights = true
+deploy_networking           = true
+deploy_managed_identity     = true
+deploy_security_governance  = true
+deploy_network_watcher      = true
+deploy_private_endpoints    = true
+deploy_rbac                 = true
+
+# Core shared services
+deploy_key_vault            = true
+deploy_storage              = true
+deploy_container_registry   = true
+
+# AI / ML services
+deploy_cognitive_services   = true   # AI Services endpoints for AI Foundry
+deploy_openai               = true   # Foundry models (Azure OpenAI)
+deploy_ai_search            = true   # AI Foundry dep + enterprise knowledge
+deploy_cosmos_db            = true   # AI Foundry dep + GenAI app state
+deploy_ai_foundry           = true   # AI Foundry Hub + Project + Agent Service
+deploy_machine_learning     = false  # Classic AML workspace (optional)
+
+# GenAI app platform
+deploy_container_app_env    = true   # Container App Env (Frontend/Orch/SK/MCP/Ingestion)
+deploy_app_configuration    = true   # Centralised feature flags for microservices
+deploy_api_management       = true   # APIM gateway (internal VNet mode)
+deploy_app_gateway          = true   # Application Gateway + WAF (public ingress)
+
+# Admin VMs
+deploy_jumpbox              = true   # Jump box VM for admin access
+deploy_build_agent          = true   # Self-hosted CI/CD build agent
+
+# Optional integrations
+deploy_bing_grounding       = false  # Bing Search for enterprise knowledge grounding
+
+# =============================================================================
+# NETWORKING
+# VNET: 10.226.214.0/24  (256 IPs: .0 – .255)
+# Ten subnets sized to their workload; 88 IPs (.176 – .255) unallocated for growth.
+# =============================================================================
+hub_vnet_id        = "/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/rg-hub-network/providers/Microsoft.Network/virtualNetworks/vnet-hub-prod"
+hub_vnet_name      = "vnet-hub-prod"
+hub_resource_group = "rg-hub-network"
+
+# Subnet layout — defaults in variables.tf; override only if your IP plan differs:
+#
+#   Subnet                 CIDR                    Range              Purpose
+#   ─────────────────────  ──────────────────────  ─────────────────  ─────────────────────────────────────
+#   private-endpoints      10.226.214.0/27          .0   – .31        All service private endpoint NICs
+#   ai-foundry-agent       10.226.214.32/28         .32  – .47        AI Foundry Agent Service runtime
+#   api-management         10.226.214.48/29         .48  – .55        APIM internal VNet mode
+#   container-app-env      10.226.214.64/27         .64  – .95        Container App Environment (/27 min required by Microsoft)
+#   application-gateway    10.226.214.96/28         .96  – .111       App Gateway WAF (dedicated subnet)
+#   build-agent            10.226.214.112/29        .112 – .119       Self-hosted CI/CD build agent VM
+#   jumpbox                10.226.214.120/29        .120 – .127       Admin jump box VM
+#   databricks-public      10.226.214.128/28        .128 – .143       Reserved — future Azure Databricks
+#   databricks-private     10.226.214.144/28        .144 – .159       Reserved — future Azure Databricks
+#   aml-compute            10.226.214.160/28        .160 – .175       AML Compute Instances (no public IP)
+#   (growth space)         10.226.214.176/27+       .176 – .255       Unallocated — available for future subnets
+
+# =============================================================================
+# OBSERVABILITY & MONITORING
+# =============================================================================
+log_analytics_sku      = "PerGB2018"
+log_retention_days     = 90
+alert_email_addresses  = ["platform-alerts@contoso.com", "oncall@contoso.com"]
+
+# =============================================================================
+# SECURITY & GOVERNANCE
+# =============================================================================
+allowed_locations = ["canadacentral", "canadaeast", "eastus", "eastus2"]
+
+defender_for_cloud_plans = [
+  "VirtualMachines",
+  "ContainerRegistry",
+  "KeyVaults",
+  "StorageAccounts",
+  "AppServices"
+]
+
+# purview_account_name = ""  # Leave blank to auto-generate from naming convention
+
+# =============================================================================
+# KEY VAULT
+# =============================================================================
+key_vault_sku = "premium"   # premium = HSM-backed keys
+
+# =============================================================================
+# STORAGE
+# =============================================================================
+storage_account_tier     = "Standard"
+storage_replication_type = "GRS"
+
+# =============================================================================
+# CONTAINER REGISTRY
+# =============================================================================
+container_registry_sku = "Premium"   # Premium required for private endpoints
+
+# =============================================================================
+# AZURE OPENAI (Foundry models)
+# =============================================================================
+deploy_openai   = true
+openai_location = "eastus"   # OpenAI availability: eastus, eastus2, canadaeast
+
+openai_model_deployments = {
+  "gpt-4-turbo" = {
+    model_name    = "gpt-4"
+    model_version = "turbo-2024-04-09"
+    capacity      = 10
+  }
+  "text-embedding-3-large" = {
+    model_name    = "text-embedding-3-large"
+    model_version = "1"
+    capacity      = 30
+  }
+}
+
+# =============================================================================
+# AI FOUNDRY
+# Azure AI Foundry Hub + Project + Agent Service standard setup
+# =============================================================================
+ai_foundry_display_name  = "AI Foundry Hub"
+ai_foundry_project_name  = "GenAI Platform"
+ai_foundry_sku           = "Basic"
+
+# =============================================================================
+# AI SEARCH (AI Foundry dependency + enterprise knowledge source)
+# =============================================================================
+ai_search_sku             = "standard"
+ai_search_replica_count   = 2   # Min 2 for HA in production
+ai_search_partition_count = 1
+
+# =============================================================================
+# COSMOS DB (AI Foundry dependency + GenAI app state)
+# =============================================================================
+cosmos_db_offer_type        = "Standard"
+cosmos_db_kind              = "GlobalDocumentDB"   # NoSQL API
+cosmos_db_consistency_level = "Session"
+
+cosmos_db_databases = {
+  # AI Foundry Agent Service memory: sessions, history, entity cache
+  "agent-memory" = {
+    throughput = 400
+    containers = ["sessions", "history", "entities"]
+  }
+  # GenAI app microservice state and result cache
+  "app-data" = {
+    throughput = 400
+    containers = ["configs", "results"]
+  }
+}
+
+# =============================================================================
+# CONTAINER APP ENVIRONMENT + GENAI MICROSERVICES
+# Dapr-enabled microservices: Frontend, Orchestrator, SK, MCP, Ingestion
+# =============================================================================
+container_app_environment_sku = "Consumption"
+
+container_app_microservices = {
+  # Public-facing API gateway exposed via App Gateway -> APIM -> Frontend
+  "frontend" = {
+    image           = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+    cpu             = 0.5
+    memory          = "1.0Gi"
+    min_replicas    = 1
+    max_replicas    = 10
+    ingress_enabled = true
+  }
+  # Core agent orchestration loop (Semantic Kernel / LangChain)
+  "orchestrator" = {
+    image           = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+    cpu             = 1.0
+    memory          = "2.0Gi"
+    min_replicas    = 1
+    max_replicas    = 10
+    ingress_enabled = false
+  }
+  # Semantic Kernel plugin host
+  "sk-agent" = {
+    image           = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+    cpu             = 1.0
+    memory          = "2.0Gi"
+    min_replicas    = 1
+    max_replicas    = 10
+    ingress_enabled = false
+  }
+  # Model Context Protocol server — exposes tools and resources to agents
+  "mcp-server" = {
+    image           = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+    cpu             = 0.5
+    memory          = "1.0Gi"
+    min_replicas    = 1
+    max_replicas    = 5
+    ingress_enabled = false
+  }
+  # RAG data ingestion pipeline: chunk -> embed -> index to AI Search
+  "ingestion" = {
+    image           = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+    cpu             = 1.0
+    memory          = "2.0Gi"
+    min_replicas    = 0   # Scale to zero when no ingestion jobs
+    max_replicas    = 5
+    ingress_enabled = false
+  }
+}
+
+# =============================================================================
+# API MANAGEMENT
+# Internal VNet mode — sits between App Gateway and Container Apps.
+# Use Premium SKU for production VNet integration; Developer for non-prod.
+# =============================================================================
+apim_sku             = "Developer"         # Change to "Premium" for production
+apim_publisher_name  = "AI Platform Team"
+apim_publisher_email = "platform-team@contoso.com"
+
+# =============================================================================
+# APPLICATION GATEWAY + WAF
+# =============================================================================
+app_gateway_sku_name  = "WAF_v2"
+app_gateway_sku_tier  = "WAF_v2"
+app_gateway_capacity  = 2          # Min 2 for HA
+waf_mode              = "Prevention"
+
+# =============================================================================
+# JUMP BOX VM
+# No public IP — access via Azure Bastion (hub) or VPN.
+# =============================================================================
+jumpbox_vm_size        = "Standard_B2s"
+jumpbox_admin_username = "azureadmin"
+
+# =============================================================================
+# BUILD AGENT VM
+# Self-hosted CI/CD agent pre-authorized to push to ACR and deploy to CAE.
+# =============================================================================
+build_agent_vm_size        = "Standard_D4s_v3"
+build_agent_admin_username = "azureadmin"
+
+# SSH public key used by both VMs (generate with ssh-keygen -t rsa -b 4096)
+admin_ssh_public_key = "ssh-rsa AAAA...replace-with-your-public-key"
+
+# =============================================================================
+# RBAC — AAD Group Object IDs
+# Uncomment and populate with real GUIDs once AAD groups have been created.
+# =============================================================================
+# data_scientist_group_id    = "33333333-3333-3333-3333-333333333333"
+# ml_engineer_group_id       = "44444444-4444-4444-4444-444444444444"
+# data_engineer_group_id     = "55555555-5555-5555-5555-555555555555"
+# ai_app_developer_group_id  = "66666666-6666-6666-6666-666666666666"
+# platform_admin_group_id    = "77777777-7777-7777-7777-777777777777"

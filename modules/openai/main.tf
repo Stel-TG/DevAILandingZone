@@ -13,7 +13,7 @@ resource "azurerm_cognitive_account" "openai" {
 
   public_network_access_enabled = false
 
-  custom_subdomain_name = var.name # Required for private endpoint DNS
+  custom_subdomain_name = var.name
 
   network_acls {
     default_action = "Deny"
@@ -23,7 +23,6 @@ resource "azurerm_cognitive_account" "openai" {
   tags = var.tags
 }
 
-# Model deployments - iterates over var.model_deployments map
 resource "azurerm_cognitive_deployment" "models" {
   for_each = var.model_deployments
 
@@ -49,7 +48,19 @@ resource "azurerm_monitor_diagnostic_setting" "openai" {
   target_resource_id         = azurerm_cognitive_account.openai.id
   log_analytics_workspace_id = var.log_analytics_workspace_id
 
-  enabled_log { category = "Audit" }
-  enabled_log { category = "RequestResponse" }
-  metric { category = "AllMetrics"; enabled = true }
+  enabled_log {
+    category = "Audit"
+  }
+  enabled_log {
+    category = "RequestResponse"
+  }
+
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
 }
+
+output "id"       { value = azurerm_cognitive_account.openai.id }
+output "name"     { value = azurerm_cognitive_account.openai.name }
+output "endpoint" { value = azurerm_cognitive_account.openai.endpoint }

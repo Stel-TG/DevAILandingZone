@@ -8,9 +8,9 @@ resource "azurerm_container_registry" "this" {
   resource_group_name = var.resource_group_name
   location            = var.location
   sku                 = var.sku
-  admin_enabled       = false # Use managed identity for AML access
+  admin_enabled       = false
 
-  public_network_access_enabled = false # Private endpoint only
+  public_network_access_enabled = false
 
   network_rule_set {
     default_action = "Deny"
@@ -30,7 +30,15 @@ resource "azurerm_monitor_diagnostic_setting" "acr" {
   target_resource_id         = azurerm_container_registry.this.id
   log_analytics_workspace_id = var.log_analytics_workspace_id
 
-  enabled_log { category = "ContainerRegistryLoginEvents" }
-  enabled_log { category = "ContainerRegistryRepositoryEvents" }
-  metric { category = "AllMetrics"; enabled = true }
+  enabled_log {
+    category = "ContainerRegistryLoginEvents"
+  }
+  enabled_log {
+    category = "ContainerRegistryRepositoryEvents"
+  }
+
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
 }

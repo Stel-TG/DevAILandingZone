@@ -1,7 +1,27 @@
+variable "name"                       { type = string }
 variable "resource_group_name"        { type = string }
 variable "location"                   { type = string }
-variable "subnet_id"                  { type = string; default = "" }
-variable "private_dns_zone_id"        { type = string; default = "" }
-variable "private_dns_zone_ids"       { type = map(string); default = {} }
-variable "log_analytics_workspace_id" { type = string; default = "" }
-variable "tags"                       { type = map(string); default = {} }
+variable "sku_name" {
+  type    = string
+  default = "S0"
+}
+variable "model_deployments" {
+  type = map(object({
+    model_name    = string
+    model_version = string
+    capacity      = number
+  }))
+  default = {}
+}
+variable "allowed_subnet_ids" {
+  type    = list(string)
+  default = []
+}
+variable "log_analytics_workspace_id" {
+  type    = string
+  default = null
+}
+variable "tags" {
+  type    = map(string)
+  default = {}
+}
