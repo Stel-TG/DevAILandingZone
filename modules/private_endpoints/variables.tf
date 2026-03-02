@@ -1,4 +1,4 @@
-variable "resource_group_name"  { type = string }
+variable "resource_group_name" { type = string }
 variable "location"             { type = string }
 variable "subnet_id"            { type = string }
 variable "hub_vnet_id"          { type = string }
@@ -7,7 +7,6 @@ variable "tags" {
   default = {}
 }
 
-# Core services
 variable "key_vault_id" {
   type        = string
   default     = null
@@ -23,8 +22,6 @@ variable "container_registry_id" {
   default     = null
   description = "Container Registry resource ID. null = skip PE."
 }
-
-# AI / ML services
 variable "machine_learning_id" {
   type        = string
   default     = null
@@ -45,8 +42,6 @@ variable "ai_foundry_id" {
   default     = null
   description = "AI Foundry Hub (AML workspace) resource ID. null = skip PE."
 }
-
-# AI Foundry dependencies
 variable "ai_search_id" {
   type        = string
   default     = null
@@ -57,15 +52,11 @@ variable "cosmos_db_id" {
   default     = null
   description = "Cosmos DB account resource ID. null = skip PE."
 }
-
-# GenAI app dependencies
 variable "app_configuration_id" {
   type        = string
   default     = null
   description = "App Configuration store resource ID. null = skip PE."
 }
-
-# Ingress and observability
 variable "log_analytics_id" {
   type        = string
   default     = null

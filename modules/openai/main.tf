@@ -12,8 +12,7 @@ resource "azurerm_cognitive_account" "openai" {
   sku_name            = var.sku_name
 
   public_network_access_enabled = false
-
-  custom_subdomain_name = var.name
+  custom_subdomain_name         = var.name
 
   network_acls {
     default_action = "Deny"
@@ -60,7 +59,3 @@ resource "azurerm_monitor_diagnostic_setting" "openai" {
     enabled  = true
   }
 }
-
-output "id"       { value = azurerm_cognitive_account.openai.id }
-output "name"     { value = azurerm_cognitive_account.openai.name }
-output "endpoint" { value = azurerm_cognitive_account.openai.endpoint }

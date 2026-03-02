@@ -1,4 +1,4 @@
-variable "resource_group_id"          { type = string }
+variable "resource_group_id" { type = string }
 variable "machine_learning_id" {
   type    = string
   default = null

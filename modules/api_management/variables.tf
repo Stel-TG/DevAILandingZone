@@ -1,6 +1,6 @@
-variable "name"                         { type = string }
-variable "resource_group_name"           { type = string }
-variable "location"                      { type = string }
+variable "name"               { type = string }
+variable "resource_group_name" { type = string }
+variable "location"            { type = string }
 variable "sku_name" {
   type        = string
   default     = "Developer_1"
@@ -10,7 +10,7 @@ variable "publisher_name" {
   type    = string
   default = "AI Platform Team"
 }
-variable "publisher_email"               { type = string }
+variable "publisher_email" { type = string }
 variable "subnet_id" {
   type        = string
   description = "Subnet ID for APIM VNet integration (api-management subnet)"
@@ -28,7 +28,7 @@ variable "deploy_private_endpoint" {
   type    = bool
   default = true
 }
-variable "log_analytics_workspace_id"    { type = string }
+variable "log_analytics_workspace_id" { type = string }
 variable "tags" {
   type    = map(string)
   default = {}

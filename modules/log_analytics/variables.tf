@@ -20,8 +20,14 @@ variable "retention_days" {
   default     = 90
   description = "Data retention in days."
 }
-variable "enable_security_center_solution"    { type = bool; default = true }
-variable "enable_container_insights_solution" { type = bool; default = true }
+variable "enable_security_center_solution" {
+  type    = bool
+  default = true
+}
+variable "enable_container_insights_solution" {
+  type    = bool
+  default = true
+}
 variable "tags" {
   type    = map(string)
   default = {}

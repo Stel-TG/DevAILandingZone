@@ -1,7 +1,7 @@
-variable "name"                         { type = string }
-variable "nic_name"                      { type = string }
-variable "resource_group_name"           { type = string }
-variable "location"                      { type = string }
+variable "name"               { type = string }
+variable "nic_name"            { type = string }
+variable "resource_group_name" { type = string }
+variable "location"            { type = string }
 variable "subnet_id" {
   type        = string
   description = "Subnet ID for build agent NIC (build-agent subnet)"
